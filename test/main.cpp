@@ -59,6 +59,7 @@ static const GLfloat g_vertex_buffer_data[] = {
 	1.0f,-1.0f, 1.0f, 1.0f,
 };
 int drawScene();
+void timeMeasure();
 int drawCube(GLuint &vertexbuffer, ShaderProgram Shader);
 int initGL(int x, int y);
 void Display();
@@ -71,14 +72,13 @@ int main(int argc, char ** argv)
 	Shader.on();
 	// This will identify our vertex buffer
 	// Generate 1 buffer, put the resulting identifier in vertexbuffer
-	//	GLuint vertexbuffer;
-/*	glGenBuffers(1, &vertexbuffer);
+		GLuint vertexbuffer;
+//	glGenBuffers(1, &vertexbuffer);
 	// The following commands will talk about our 'vertexbuffer' buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+//	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	// Give our vertices to OpenGL.
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-*/
+//	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
+
 	std::vector<GLfloat> vertex(g_vertex_buffer_data, g_vertex_buffer_data + (3 * 12 * 4) );
 
 	std::vector<GLfloat> trianglev(triangle, triangle + 3 * 4);
@@ -92,15 +92,8 @@ int main(int argc, char ** argv)
 			glm::vec3(0.0f, 1.0f, 0.0f));
 	double time = glfwGetTime();
 	double time2 = time;
-	int counter = 0;
 	do{
-	counter++;
-		if (time2 + 1 < time)
-		{
-	fprintf(stderr,"%f ms/frame\n",(time2 - time) * 1000 / counter);
-		time2 = time;
-		counter = 0;
-		}
+		timeMeasure();
 	angle_x += speed_x * (glfwGetTime() - time);	
 	angle_y += speed_y * (glfwGetTime() - time);
 	time = glfwGetTime();
@@ -113,6 +106,7 @@ int main(int argc, char ** argv)
 		cube.setMVPMatrix(mvp);
 		cube.draw();
 
+	//	drawCube(vertexbuffer, Shader);
 		glfwSwapBuffers(window); //
 		glfwPollEvents(); // od klawiszy
 	} // Check if the ESC key was pressed or the window was closed
@@ -124,6 +118,20 @@ int main(int argc, char ** argv)
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
+}
+void timeMeasure()
+{
+	static int counter;
+	static double time1 = glfwGetTime();
+	double time2 = glfwGetTime();
+	counter++;
+	if (time2 > 1 + time1)
+	{
+		fprintf(stderr,"%f ms/frame\n",(time2 - time1) * 1000 / counter);
+		time1 = time2;
+		counter = 0;
+	}
+	return;
 }
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -143,21 +151,22 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 int drawCube(GLuint &vertexbuffer,ShaderProgram Shader)
 {
 	GLuint Shadermpv = Shader.getUniformLocation("mvp");
-//	glBindVertexArray(VertexArrayID);
+	glBindVertexArray(VertexArrayID);
 	glUniformMatrix4fv(Shadermpv, 1, false, glm::value_ptr(mvp));
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(
 			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-			3,                  // size
+			4,                  // size
 			GL_FLOAT,           // type
 			GL_FALSE,           // normalized?
 			0,                  // stride
 			(void*)0            // array buffer offset
 			);
 	// Draw the triangle !
-	glDrawArrays(GL_TRIANGLES, 0, 12*3); // Starting from vertex 0; 3 vertices total -> 1 triangle
+	glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
 	glDisableVertexAttribArray(0);
+	glBindVertexArray(0);
 }
 int drawScene()
 {
@@ -165,14 +174,14 @@ int drawScene()
 
 }
 
-int initGL(int x, int y)
+int initGL(int x, int y) //??? do poprawy
 {
 	glfwInit();
-//	glfwWindowHint(GLFW_SAMPLES, 4);
+	//	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // We want OpenGL 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-//	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-//	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //We don't want the old OpenGL 
+	//	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+	//	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //We don't want the old OpenGL 
 
 
 	// Open a window and create its OpenGL context
