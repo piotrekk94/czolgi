@@ -11,7 +11,7 @@
 #include "model.hpp"
 float speed_x, speed_y;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-GLFWwindow* window; // (In the accompanying source code, this variable is global)
+GLFWwindow* window; 
 GLuint VertexArrayID;
 	glm::mat4 mvp;
 static const GLfloat triangle[] = {
@@ -21,42 +21,42 @@ static const GLfloat triangle[] = {
 	0.0f,  0.3f, 0.0f, 1.0f,
 };
 static const GLfloat g_vertex_buffer_data[] = {
-	-1.0f,-1.0f,-1.0f, 1.0f, // triangle 1 : begin
-	-1.0f,-1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, 1.0f, // triangle 1 : end
-	1.0f, 1.0f,-1.0f, 1.0f, // triangle 2 : begin
-	-1.0f,-1.0f,-1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f, 1.0f, // triangle 2 : end
-	1.0f,-1.0f, 1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f, 1.0f,
-	1.0f,-1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f,-1.0f, 1.0f,
-	1.0f,-1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f,-1.0f, 1.0f,
-	1.0f,-1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f,-1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f,-1.0f, 1.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,// 1.0f, // triangle 1 : begin
+	-1.0f,-1.0f, 1.0f,// 1.0f,
+	-1.0f, 1.0f, 1.0f,// 1.0f, // triangle 1 : end
+	1.0f, 1.0f,-1.0f,// 1.0f, // triangle 2 : begin
+	-1.0f,-1.0f,-1.0f,// 1.0f,
+	-1.0f, 1.0f,-1.0f,// 1.0f, // triangle 2 : end
+	1.0f,-1.0f, 1.0f,// 1.0f,
+	-1.0f,-1.0f,-1.0f,// 1.0f,
+	1.0f,-1.0f,-1.0f,// 1.0f,
+	1.0f, 1.0f,-1.0f,// 1.0f,
+	1.0f,-1.0f,-1.0f,// 1.0f,
+	-1.0f,-1.0f,-1.0f,// 1.0f,
+	-1.0f,-1.0f,-1.0f,// 1.0f,
+	-1.0f, 1.0f, 1.0f,// 1.0f,
+	-1.0f, 1.0f,-1.0f,// 1.0f,
+	1.0f,-1.0f, 1.0f,// 1.0f,
+	-1.0f,-1.0f, 1.0f,// 1.0f,
+	-1.0f,-1.0f,-1.0f,// 1.0f,
+	-1.0f, 1.0f, 1.0f,// 1.0f,
+	-1.0f,-1.0f, 1.0f,// 1.0f,
+	1.0f,-1.0f, 1.0f,// 1.0f,
+	1.0f, 1.0f, 1.0f,// 1.0f,
+	1.0f,-1.0f,-1.0f,// 1.0f,
+	1.0f, 1.0f,-1.0f,// 1.0f,
+	1.0f,-1.0f,-1.0f,// 1.0f,
+	1.0f, 1.0f, 1.0f,// 1.0f,
+	1.0f,-1.0f, 1.0f,// 1.0f,
+	1.0f, 1.0f, 1.0f,// 1.0f,
+	1.0f, 1.0f,-1.0f,// 1.0f,
+	-1.0f, 1.0f,-1.0f,// 1.0f,
+	1.0f, 1.0f, 1.0f,// 1.0f,
+	-1.0f, 1.0f,-1.0f,// 1.0f,
+	-1.0f, 1.0f, 1.0f,// 1.0f,
+	1.0f, 1.0f, 1.0f,// 1.0f,
+	-1.0f, 1.0f, 1.0f,// 1.0f,
+	1.0f,-1.0f, 1.0f,// 1.0f,
 };
 int drawScene();
 void timeMeasure();
@@ -66,7 +66,7 @@ void Display();
 int main(int argc, char ** argv)
 {
 	initGL(1024, 768);
-	glClearColor(0,0,1,0);
+	glClearColor(0,0,0.2,0);
 	//	glutMainloop();
 	ShaderProgram Shader("vertex.vert", "fragment.frag");
 	Shader.on();
@@ -83,7 +83,8 @@ int main(int argc, char ** argv)
 
 	std::vector<GLfloat> trianglev(triangle, triangle + 3 * 4);
 	Model cube("models/zero.obj" , &Shader, VertexArrayID);
-	//Model cube2(vertex , &Shader, VertexArrayID);
+	Model cube2(vertex , &Shader, VertexArrayID);
+	cube.textureLoad("./tekstura.bmp");
 
 	float angle_x = 0, angle_y = 0;
 	glm::mat4 PMatrix = glm::perspective(float(50 ), float(1024/768), 1.0f, 50.0f);
@@ -108,8 +109,8 @@ int main(int argc, char ** argv)
 		glm::mat4 mvp2 = PMatrix * VMatrix * ModelMatrix2;
 		cube.setMVPMatrix(mvp);
 		cube.draw();
-	//	cube2.setMVPMatrix(mvp2);
-	//	cube2.draw();
+		cube2.setMVPMatrix(mvp2);
+		cube2.draw();
 
 	//	drawCube(vertexbuffer, Shader);
 		glfwSwapBuffers(window); //
