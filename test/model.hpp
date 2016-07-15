@@ -5,6 +5,12 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+//assimp
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/vector3.h>
+//
 
 #include "shader.hpp"
 class Model
@@ -12,9 +18,14 @@ class Model
 	public:
 		int draw();
 		Model(std::vector<GLfloat> &inVertex, ShaderProgram * shader, GLuint vertexArrayID);
+		Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID);
 		int setMVPMatrix(glm::mat4 MVPMatrix);
+		void rotate();
+		void translate();
+		void scale();
 	private:
-		std::vector<GLfloat> vertex;
+//		std::vector<GLfloat> vertex;
+		int verticesAmount;
 		ShaderProgram * shader = nullptr;
 		int angle_x, angle_y, angle_z;
 void assignVBO(const char * name);

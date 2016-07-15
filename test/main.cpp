@@ -82,7 +82,8 @@ int main(int argc, char ** argv)
 	std::vector<GLfloat> vertex(g_vertex_buffer_data, g_vertex_buffer_data + (3 * 12 * 4) );
 
 	std::vector<GLfloat> trianglev(triangle, triangle + 3 * 4);
-	Model cube(vertex , &Shader, VertexArrayID);
+	Model cube("models/zero.obj" , &Shader, VertexArrayID);
+	//Model cube2(vertex , &Shader, VertexArrayID);
 
 	float angle_x = 0, angle_y = 0;
 	glm::mat4 PMatrix = glm::perspective(float(50 ), float(1024/768), 1.0f, 50.0f);
@@ -99,12 +100,16 @@ int main(int argc, char ** argv)
 	time = glfwGetTime();
 	glm::mat4 ModelMatrix = glm::scale(glm::mat4(1.0f),glm::vec3(0.5f, 0.5f, 0.1f));
 	ModelMatrix = glm::translate(ModelMatrix, glm::vec3(-1.0f, -1.0f, -1.0f));
+	glm::mat4 ModelMatrix2 = glm::translate(ModelMatrix, glm::vec3(2.0f, 2.0f, 2.0f));
 	ModelMatrix = glm::rotate(ModelMatrix, angle_x, glm::vec3(1,0,0));
 	ModelMatrix = glm::rotate(ModelMatrix, angle_y, glm::vec3(0,1,0));
 		drawScene();
 		mvp = PMatrix * VMatrix * ModelMatrix;
+		glm::mat4 mvp2 = PMatrix * VMatrix * ModelMatrix2;
 		cube.setMVPMatrix(mvp);
 		cube.draw();
+	//	cube2.setMVPMatrix(mvp2);
+	//	cube2.draw();
 
 	//	drawCube(vertexbuffer, Shader);
 		glfwSwapBuffers(window); //
