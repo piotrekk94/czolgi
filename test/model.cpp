@@ -3,7 +3,9 @@ int Model::draw()
 {
 
 	shader->on();
-	glUniformMatrix4fv(	shader->getUniformLocation("mvp"), 1, false, glm::value_ptr(MVPMatrix));
+	glUniformMatrix4fv(	shader->getUniformLocation("M"), 1, false, glm::value_ptr(MMatrix));
+	glUniformMatrix4fv(	shader->getUniformLocation("V"), 1, false, glm::value_ptr(VMatrix));
+	glUniformMatrix4fv(	shader->getUniformLocation("P"), 1, false, glm::value_ptr(PMatrix));
 	glBindVertexArray(vertexArrayID);
 	glDrawArrays(GL_TRIANGLES, 0, verticesAmount ); // Starting from vertex 0; 3 vertices total -> 1 triangle
 	//glDisableVertexAttribArray(0); // to usuwa
@@ -30,6 +32,7 @@ Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID
 {
 	std::vector<GLfloat> vertices;
 	std::vector<GLfloat> texture;
+	std::vector<GLfloat> normals;
 	int totalVertices = 0;
 	Assimp::Importer importer;
 	glGenVertexArrays(1,&vertexArrayID); // ??? osobne dla każdego modelu czy nie?
@@ -64,6 +67,19 @@ Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID
 					texture.push_back(uv[1]);
 				}
 			}
+			else
+				fprintf(stderr,"plik nie współrzędnych teksturowania: %s\n", fileName);
+			if (mesh->HasNormals())
+			{
+				for(int k = 0 ; k < 3 ; k++)
+				{
+					aiVector3t<float> temp = mesh->mNormals[face.mIndices[k]];
+					normals.push_back(temp[0]);
+					normals.push_back(temp[1]);
+					normals.push_back(temp[2]);
+				}
+			}
+			else fprintf(stderr,"plik nie ma normalnych: %s\n", fileName);
 		}
 		totalVertices += mesh->mNumVertices;
 	}
@@ -75,10 +91,15 @@ Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID
 	glGenBuffers(1, &textureBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
 	glBufferData(GL_ARRAY_BUFFER, texture.size() * sizeof(texture[0]), &texture[0], GL_STATIC_DRAW);
+
+	glGenBuffers(1, &normalsBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(normals[0]), &normals[0], GL_STATIC_DRAW);
 	//
 	//glGenVertexArrays(1,&vertexArrayID); // ??? osobne dla każdego modelu czy nie?
 	glBindVertexArray(this->vertexArrayID);
 	assignVBO("vertex", vertexbuffer);
+	assignVBO("Normals", normalsBuffer);
 	assignVBO("vertexTexture", textureBuffer);
 	glBindVertexArray(0);
 	verticesAmount = totalVertices;
@@ -104,6 +125,33 @@ int Model::setMVPMatrix(glm::mat4 MVPMatrix)
 {
 	this->MVPMatrix = MVPMatrix;
 	return 0;
+}
+int Model::setMMatrix(glm::mat4 MMatrix)
+{
+	this->MMatrix = MMatrix;
+	return 0;
+}
+int Model::setVMatrix(glm::mat4 VMatrix)
+{
+	this->VMatrix = VMatrix;
+	return 0;
+}
+int Model::setPMatrix(glm::mat4 PMatrix)
+{
+	this->PMatrix = PMatrix;
+	return 0;
+}
+void Model::translate(glm::vec3 vector)
+{
+	MMatrix = glm::translate(MMatrix, vector);
+}
+void Model::scale(glm::vec3 vector)
+{
+	MMatrix = glm::scale(MMatrix, vector);
+}
+void Model::rotate(float angle, glm::vec3 vector)
+{
+	MMatrix = glm::rotate(MMatrix, angle, vector);
 }
 void Model::assignVBO(const char * name, GLuint buf)
 {

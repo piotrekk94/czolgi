@@ -10,6 +10,7 @@
 #include "shader.hpp"
 #include "model.hpp"
 float speed_x, speed_y;
+float camera = 10.0f;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 GLFWwindow* window; 
 GLuint VertexArrayID;
@@ -83,19 +84,19 @@ int main(int argc, char ** argv)
 
 	std::vector<GLfloat> trianglev(triangle, triangle + 3 * 4);
 	Model cube("models/zero.obj" , &Shader, VertexArrayID);
-	Model cube2(vertex , &Shader, VertexArrayID);
+	Model cube2("models/cube.obj" , &Shader, VertexArrayID);
 	cube.textureLoad("./tekstura.bmp");
 
 	float angle_x = 0, angle_y = 0;
 	glm::mat4 PMatrix = glm::perspective(float(50 ), float(1024/768), 1.0f, 50.0f);
-	glm::mat4 VMatrix = glm::lookAt(
-			glm::vec3(10.0f, 10.0f, 10.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
 	double time = glfwGetTime();
 	double time2 = time;
 	do{
 		timeMeasure();
+	glm::mat4 VMatrix = glm::lookAt(
+			glm::vec3(camera, camera, camera),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f));
 	angle_x += speed_x * (glfwGetTime() - time);	
 	angle_y += speed_y * (glfwGetTime() - time);
 	time = glfwGetTime();
@@ -107,9 +108,19 @@ int main(int argc, char ** argv)
 		drawScene();
 		mvp = PMatrix * VMatrix * ModelMatrix;
 		glm::mat4 mvp2 = PMatrix * VMatrix * ModelMatrix2;
+		cube.setMMatrix(glm::mat4(1.0f));// reset
+		cube.scale(glm::vec3(0.5f, 0.5f, 0.1f));
+		cube.translate(glm::vec3(-1,-1,-1));
+		cube.rotate(angle_x, glm::vec3(1,0,0));
+		cube.rotate(angle_y, glm::vec3(0,1,0));
+		cube.setVMatrix(VMatrix);
+		cube.setPMatrix(PMatrix);
 		cube.setMVPMatrix(mvp);
 		cube.draw();
-		cube2.setMVPMatrix(mvp2);
+		cube2.setMMatrix(glm::mat4(1));
+		cube2.translate(glm::vec3(-2,1,1));
+		cube2.setVMatrix(VMatrix);
+		cube2.setPMatrix(PMatrix);
 		cube2.draw();
 
 	//	drawCube(vertexbuffer, Shader);
@@ -147,6 +158,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		if (key == GLFW_KEY_RIGHT) speed_y = 3.14;
 		if (key == GLFW_KEY_UP) speed_x = -3.14;
 		if (key == GLFW_KEY_DOWN) speed_x = 3.14;
+		if (key == GLFW_KEY_W) camera += 0.5f;
+		if (key == GLFW_KEY_S) camera -= 0.5f;
 	}
 	if (action == GLFW_RELEASE) 
 	{

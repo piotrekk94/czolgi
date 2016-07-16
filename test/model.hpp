@@ -21,10 +21,14 @@ class Model
 		Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID);
 		~Model();
 		int setMVPMatrix(glm::mat4 MVPMatrix);
+int setVMatrix(glm::mat4 MMatrix);
+int setMMatrix(glm::mat4 MMatrix);
+int setPMatrix(glm::mat4 MMatrix);
 		void textureLoad(const char * fileName);
-		void rotate();
-		void translate();
-		void scale();
+		void resetMMatrix();
+		void rotate(float angle, glm::vec3 vector);
+		void translate(glm::vec3 vector);
+		void scale(glm::vec3 vector);
 	private:
 //		std::vector<GLfloat> vertex;
 		int verticesAmount;
@@ -33,6 +37,7 @@ class Model
 void assignVBO(const char * name, GLuint buf);
 		GLuint vertexbuffer;
 		GLuint textureBuffer;
+		GLuint normalsBuffer;
 		GLuint texture;
 		GLuint vertexArrayID;
 		glm::mat4 MMatrix = glm::mat4(1.0f);	
