@@ -73,7 +73,7 @@ int main(int argc, char ** argv)
 	Shader.on();
 	// This will identify our vertex buffer
 	// Generate 1 buffer, put the resulting identifier in vertexbuffer
-		GLuint vertexbuffer;
+//		GLuint vertexbuffer;
 //	glGenBuffers(1, &vertexbuffer);
 	// The following commands will talk about our 'vertexbuffer' buffer
 //	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -83,14 +83,15 @@ int main(int argc, char ** argv)
 	std::vector<GLfloat> vertex(g_vertex_buffer_data, g_vertex_buffer_data + (3 * 12 * 4) );
 
 	std::vector<GLfloat> trianglev(triangle, triangle + 3 * 4);
-	Model cube("models/zero.obj" , &Shader, VertexArrayID);
-	Model cube2("models/cube.obj" , &Shader, VertexArrayID);
+	Model cube("models/cube.obj" , &Shader, VertexArrayID);
+	Model cube3("models/cube.obj" , &Shader, VertexArrayID);
+	Model cube2("models/zero.obj" , &Shader, VertexArrayID);
 	cube.textureLoad("./tekstura.bmp");
 
 	float angle_x = 0, angle_y = 0;
 	glm::mat4 PMatrix = glm::perspective(float(50 ), float(1024/768), 1.0f, 50.0f);
 	double time = glfwGetTime();
-	double time2 = time;
+//	double time2 = time;
 	do{
 		timeMeasure();
 	glm::mat4 VMatrix = glm::lookAt(
@@ -102,15 +103,15 @@ int main(int argc, char ** argv)
 	time = glfwGetTime();
 	glm::mat4 ModelMatrix = glm::scale(glm::mat4(1.0f),glm::vec3(0.5f, 0.5f, 0.1f));
 	ModelMatrix = glm::translate(ModelMatrix, glm::vec3(-1.0f, -1.0f, -1.0f));
-	glm::mat4 ModelMatrix2 = glm::translate(ModelMatrix, glm::vec3(2.0f, 2.0f, 2.0f));
+	//glm::mat4 ModelMatrix2 = glm::translate(ModelMatrix, glm::vec3(2.0f, 2.0f, 2.0f));
 	ModelMatrix = glm::rotate(ModelMatrix, angle_x, glm::vec3(1,0,0));
 	ModelMatrix = glm::rotate(ModelMatrix, angle_y, glm::vec3(0,1,0));
 		drawScene();
 		mvp = PMatrix * VMatrix * ModelMatrix;
-		glm::mat4 mvp2 = PMatrix * VMatrix * ModelMatrix2;
+	//	glm::mat4 mvp2 = PMatrix * VMatrix * ModelMatrix2;
 		cube.setMMatrix(glm::mat4(1.0f));// reset
 		cube.scale(glm::vec3(0.5f, 0.5f, 0.1f));
-		cube.translate(glm::vec3(-1,-1,-1));
+		cube.translate(glm::vec3(-1,-1,5));
 		cube.rotate(angle_x, glm::vec3(1,0,0));
 		cube.rotate(angle_y, glm::vec3(0,1,0));
 		cube.setVMatrix(VMatrix);
@@ -118,10 +119,16 @@ int main(int argc, char ** argv)
 		cube.setMVPMatrix(mvp);
 		cube.draw();
 		cube2.setMMatrix(glm::mat4(1));
-		cube2.translate(glm::vec3(-2,1,1));
+		cube2.translate(glm::vec3(0,0,0));
 		cube2.setVMatrix(VMatrix);
 		cube2.setPMatrix(PMatrix);
 		cube2.draw();
+		cube3.setMMatrix(glm::mat4(1));
+		cube3.translate(glm::vec3(0,0,0));
+		cube3.scale(glm::vec3(0.1,0.1,0.1));
+		cube3.setVMatrix(VMatrix);
+		cube3.setPMatrix(PMatrix);
+		cube3.draw();
 
 	//	drawCube(vertexbuffer, Shader);
 		glfwSwapBuffers(window); //
@@ -186,11 +193,12 @@ int drawCube(GLuint &vertexbuffer,ShaderProgram Shader)
 	glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
 	glDisableVertexAttribArray(0);
 	glBindVertexArray(0);
+	return 0;
 }
 int drawScene()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	return 0;
 }
 
 int initGL(int x, int y) //??? do poprawy
@@ -222,4 +230,5 @@ int initGL(int x, int y) //??? do poprawy
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	glfwSetKeyCallback(window, key_callback);
 	glEnable(GL_DEPTH_TEST); // z-bufor
+	return 0;
 }
