@@ -11,9 +11,9 @@ int Model::draw()
 	//
 	if (light.size() > 0)
 	{
-		glUniform4f(shader->getUniformLocation("lightPosition0"), light[0].position.x,light[0].position.y,light[0].position.z,light[0].position.w);
+		glUniform4f(shader->getUniformLocation("lightPosition[0]"), light[0].position.x,light[0].position.y,light[0].position.z,light[0].position.w);
 
-		glUniform3f(shader->getUniformLocation("lightColor0"), light[0].color.x,light[0].color.y,light[0].color.z);
+		glUniform3f(shader->getUniformLocation("lightColor[0]"), light[0].color.x,light[0].color.y,light[0].color.z);
 	}
 	//
 	glBindVertexArray(vertexArrayID);
@@ -49,7 +49,7 @@ Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID
 	this->shader = shader;
 	this->vertexArrayID = vertexArrayID;
 	glGenVertexArrays(1,&(this->vertexArrayID)); // ??? osobne dla każdego modelu czy nie?
-	const aiScene * scene = importer.ReadFile( fileName, aiProcess_Triangulate /*| aiProcess_GenSmoothNormals*/);
+	const aiScene * scene = importer.ReadFile( fileName, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FixInfacingNormals);
 	if (!scene)
 	{
 		fprintf(stderr,"Błąd odczytu: %s\n", fileName);

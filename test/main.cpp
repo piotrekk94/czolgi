@@ -134,8 +134,8 @@ int main(int argc, char ** argv)
 		mvp = PMatrix * VMatrix * ModelMatrix;
 		//	glm::mat4 mvp2 = PMatrix * VMatrix * ModelMatrix2;
 		cube.setMMatrix(glm::mat4(1.0f));// reset
-		cube.scale(glm::vec3(0.5f, 0.5f, 0.1f));
-		cube.translate(glm::vec3(dx,dy,5));
+		//cube.scale(glm::vec3(0.5f, 0.5f, 0.1f));
+		cube.translate(glm::vec3(dx,dy,1));
 		cube.rotate(angle_x, glm::vec3(1,0,0));
 		cube.rotate(angle_y, glm::vec3(0,1,0));
 		cube.translate(glm::vec3(-0.5,-0.5,-0.5));
@@ -150,6 +150,7 @@ int main(int argc, char ** argv)
 		cube2.setPMatrix(PMatrix);
 		cube2.draw();
 		cube3.setMMatrix(glm::mat4(1));
+		cube.translate(glm::vec3(-0.5,-0.5,-0.5));
 		cube3.translate(glm::vec3(ldx,ldy,0));
 		cube3.scale(glm::vec3(0.1,0.1,0.1));
 		cube3.setVMatrix(VMatrix);

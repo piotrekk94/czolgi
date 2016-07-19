@@ -2,12 +2,15 @@
 in vec4 vertex2;
 in vec2 UV;
 in vec4 normals;
+ float d;
+ vec4 toLight;
+ vec4 toViewer;
 out vec4 color;
 float ambient = 0.2;
 
-uniform vec4 lightPosition0;
-uniform vec3 lightColor0;
-float lightPower0;
+uniform vec4 lightPosition[5];
+uniform vec3 lightColor[5];
+float lightPower[5];
 
 uniform mat4 M;
 uniform mat4 V;
@@ -21,50 +24,39 @@ float lambert(vec4 lightPosition, vec3 lightColor, float power);
 //
 void main()
 {
-//	lightColor0 ;
-	lightPower0 = 20;
+	vec4 actualLightPosition;
+	actualLightPosition = V * lightPosition[0];
+	d = length(vertex2 - actualLightPosition);
+	toLight = normalize(V * lightPosition[0] - V * M * vertex2);
+	toViewer = normalize(vec4(0,0,0,1) - V * M * vertex2);
+	lightPower[0] = 200;
 	/////////////////////////////
-//	lightPosition0 = vec4(0,0,0,1);
-	vec4 lightPosition;
-//	lightPosition = vec4(0,0,0,1);
-	lightPosition = P * V * lightPosition0;
-	float Il = lambert(lightPosition, lightColor0, lightPower0);
-	float Ip = phong(lightPosition, lightColor0, lightPower0, 100);
-	vec3 vertex3 = vertex2.xyz - lightPosition.xyz;
-	float d = sqrt(vertex3.x*vertex3.x + vertex3.y*vertex3.y + vertex3.z*vertex3.z);
+	float Il = lambert(actualLightPosition, lightColor[0], lightPower[0]);
+	float Ip = phong(actualLightPosition, lightColor[0], lightPower[0], 100);
 	vec4 textureColor = vec4(1,1,0,0);
 	if (hasTexture == 1) textureColor = texture( myTexture, UV);
-	color.rgb = textureColor.rgb * ambient + simpleShading(textureColor.rgb, lightColor0 * Il , d*d);
-	color.rgb += simpleShading(textureColor.rgb , lightColor0 * Ip , d * d);
+	color.rgb = textureColor.rgb * ambient + simpleShading(textureColor.rgb, lightColor[0] * Il , d*d);
+//	color.rgb += simpleShading(textureColor.rgb , lightColor[0] * Ip , d * d); //ostre jazdy
+//	color.rgb = lightColor[0] * Il;
 }
 float phong(vec4 lightPosition, vec3 lightColor , float power, float brightness)
 {
-	vec4 P = lightPosition - vertex2;//???
-	P = normalize(P);
-	P.w = 1;
-	P = reflect(P, normals);
-	vec4 V = vec4(0,0,0,1) - vertex2;//??? camera chyba jest w 0,0,0
-	V = normalize(V);
-	float I = pow(clamp(dot(P, V),0,1), brightness);
-	return clamp(I,0,1) * power;
+	vec4 norm = normalize(normals);
+	vec4 P = normalize(-toLight);//???
+//	P = reflect(P, norm);
+	vec4 V = normalize(toViewer);
+	float I = pow(clamp(dot(P, V), 0.0, 1.0), brightness);
+	return I * power;
 
 }
 float lambert(vec4 lightPosition, vec3 lightColor, float power)
 {
-	vec4 L = lightPosition - vertex2;
-	L = normalize(L);
-	L.w = 1;
-	float I = dot(L, normals); //???
-	return clamp(I,0,1) * power;
+	vec4 norm = normalize(normals);
+	vec4 L = normalize(toLight);
+	float I = dot(norm, L); //???
+	return clamp(I, 0.0f, 1.0f) * power;
 }
 vec3 simpleShading(vec3 material, vec3 light, float distance)
 {
-	vec3 result;
-	result.x = light.x * material.x / ( distance);
-	result.x = clamp(result.x,0,1);
-	result.y = light.y * material.y / ( distance);
-	result.y = clamp(result.y,0,1);
-	result.z = light.z * material.z / ( distance);
-	result.z = clamp(result.z,0,1);
-	return result;
+	return material * light / distance;
 }
