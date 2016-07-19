@@ -1,4 +1,5 @@
 #include "model.hpp"
+std::vector<Light> Model::light;
 int Model::draw()
 {
 
@@ -7,6 +8,14 @@ int Model::draw()
 	glUniformMatrix4fv(	shader->getUniformLocation("V"), 1, false, glm::value_ptr(VMatrix));
 	glUniformMatrix4fv(	shader->getUniformLocation("P"), 1, false, glm::value_ptr(PMatrix));
 	glUniform1i(shader->getUniformLocation("hasTexture"), hasTexture);
+	//
+	if (light.size() > 0)
+	{
+		glUniform4f(shader->getUniformLocation("lightPosition0"), light[0].position.x,light[0].position.y,light[0].position.z,light[0].position.w);
+
+		glUniform3f(shader->getUniformLocation("lightColor0"), light[0].color.x,light[0].color.y,light[0].color.z);
+	}
+	//
 	glBindVertexArray(vertexArrayID);
 	glDrawArrays(GL_TRIANGLES, 0, verticesAmount ); // Starting from vertex 0; 3 vertices total -> 1 triangle
 	//glDisableVertexAttribArray(0); // to usuwa
@@ -27,10 +36,10 @@ Model::Model(std::vector<GLfloat> &inVertex, ShaderProgram * shader, GLuint vert
 	
 	//
 	glBindVertexArray(this->vertexArrayID);
-	assignVBO("vertex", vertexbuffer);
+	assignVBO("vertex", vertexbuffer, 3);
 	glBindVertexArray(0);
 }
-Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID)
+Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID, unsigned *whichMesh)
 {
 	std::vector<GLfloat> vertices;
 	std::vector<GLfloat> texture;
@@ -45,7 +54,22 @@ Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID
 	{
 		fprintf(stderr,"Błąd odczytu: %s\n", fileName);
 	}
-	for(unsigned int i = 0 ; i < scene->mNumMeshes ; i++) //!!! wczytywanie wszytkich czesci na raz
+	unsigned int meshesAmount = scene -> mNumMeshes;
+	unsigned i = 0;
+	if (whichMesh != nullptr )
+	{
+		if (*whichMesh < meshesAmount)
+		{
+			i = *whichMesh;
+			meshesAmount = i + 1;
+		}
+		else fprintf(stderr,"nie ma siatki o takim numerze wczytuje 0: %s\n", fileName);
+		{
+			i = 0;
+			meshesAmount = i + 1;
+		}
+	}
+	for(; i < meshesAmount ; i++) //!!! wczytywanie wszytkich czesci na raz
 	{
 		aiMesh * mesh = scene->mMeshes[i];
 		int iMeshFaces = mesh->mNumFaces;
@@ -66,49 +90,50 @@ Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID
 				vertices.push_back(pos[1]);
 				vertices.push_back(pos[2]);
 			}
-		if (mesh->HasTextureCoords(0))
-		{
-			for(int k = 0 ; k < 3 ; k++)
+			if (mesh->HasTextureCoords(0))
 			{
-				aiVector3t<float> uv = mesh->mTextureCoords[0][face.mIndices[k]];
-				texture.push_back(uv[0]);
-				texture.push_back(uv[1]);
+				for(int k = 0 ; k < 3 ; k++)
+				{
+					aiVector3t<float> uv = mesh->mTextureCoords[0][face.mIndices[k]];
+					texture.push_back(uv[0]);
+					texture.push_back(uv[1]);
+				}
+			}
+			if (mesh->HasNormals())
+			{
+				for(int k = 0 ; k < 3 ; k++)
+				{
+					aiVector3t<float> temp = mesh->mNormals[face.mIndices[k]];
+					normals.push_back(temp[0]);
+					normals.push_back(temp[1]);
+					normals.push_back(temp[2]);
+				}
 			}
 		}
-		if (mesh->HasNormals())
-		{
-			for(int k = 0 ; k < 3 ; k++)
-			{
-				aiVector3t<float> temp = mesh->mNormals[face.mIndices[k]];
-				normals.push_back(temp[0]);
-				normals.push_back(temp[1]);
-				normals.push_back(temp[2]);
-			}
-		}
+		totalVertices += mesh->mNumVertices;
 	}
-	totalVertices += mesh->mNumVertices;
-}
-//
-glGenBuffers(1, &vertexbuffer);
-glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_STATIC_DRAW);
+	//
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_STATIC_DRAW);
 
-glGenBuffers(1, &textureBuffer);
-glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
-glBufferData(GL_ARRAY_BUFFER, texture.size() * sizeof(texture[0]), &texture[0], GL_STATIC_DRAW);
+	glGenBuffers(1, &textureBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
+	glBufferData(GL_ARRAY_BUFFER, texture.size() * sizeof(texture[0]), &texture[0], GL_STATIC_DRAW);
 
-glGenBuffers(1, &normalsBuffer);
-glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
-glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(normals[0]), &normals[0], GL_STATIC_DRAW);
-//
-//glGenVertexArrays(1,&vertexArrayID); // ??? osobne dla każdego modelu czy nie?
-glBindVertexArray(this->vertexArrayID);
-assignVBO("vertex", vertexbuffer);
-assignVBO("Normals", normalsBuffer);
-assignVBO("vertexTexture", textureBuffer);
-glBindVertexArray(0);
-verticesAmount = totalVertices;
-
+	glGenBuffers(1, &normalsBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(normals[0]), &normals[0], GL_STATIC_DRAW);
+	//
+	//glGenVertexArrays(1,&vertexArrayID); // ??? osobne dla każdego modelu czy nie?
+	glBindVertexArray(this->vertexArrayID);
+	assignVBO("vertex", vertexbuffer, 3);
+	assignVBO("Normals", normalsBuffer, 3);
+	assignVBO("vertexTexture", textureBuffer, 2);
+	glBindVertexArray(0);
+	verticesAmount = totalVertices;
+	if (whichMesh != nullptr)
+		*whichMesh = scene -> mNumMeshes;
 }
 Model::~Model()
 {
@@ -158,10 +183,8 @@ void Model::rotate(float angle, glm::vec3 vector)
 {
 	MMatrix = glm::rotate(MMatrix, angle, vector);
 }
-void Model::assignVBO(const char * name, GLuint buf)
+void Model::assignVBO(const char * name, GLuint buf, int points)
 {
-	int points = 3;
-	if (!strcmp(name,"vertexTexture")) points = 2;
 	GLuint location = shader->getAttribLocation(name);
 	glBindBuffer(GL_ARRAY_BUFFER, buf);
 	glEnableVertexAttribArray(location);

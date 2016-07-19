@@ -5,8 +5,8 @@ in vec4 normals;
 out vec4 color;
 float ambient = 0.2;
 
-vec4 lightPosition0;
-vec3 lightColor0;
+uniform vec4 lightPosition0;
+uniform vec3 lightColor0;
 float lightPower0;
 
 uniform mat4 M;
@@ -21,14 +21,16 @@ float lambert(vec4 lightPosition, vec3 lightColor, float power);
 //
 void main()
 {
-	lightColor0 = vec3(1,1,1);
+//	lightColor0 ;
 	lightPower0 = 20;
 	/////////////////////////////
-	lightPosition0 = vec4(0,0,0,1);
-	lightPosition0 = P * V * lightPosition0;
-	float Il = lambert(lightPosition0, lightColor0, lightPower0);
-	float Ip = phong(lightPosition0, lightColor0, lightPower0, 100);
-	vec3 vertex3 = vertex2.xyz - lightPosition0.xyz;
+//	lightPosition0 = vec4(0,0,0,1);
+	vec4 lightPosition;
+//	lightPosition = vec4(0,0,0,1);
+	lightPosition = P * V * lightPosition0;
+	float Il = lambert(lightPosition, lightColor0, lightPower0);
+	float Ip = phong(lightPosition, lightColor0, lightPower0, 100);
+	vec3 vertex3 = vertex2.xyz - lightPosition.xyz;
 	float d = sqrt(vertex3.x*vertex3.x + vertex3.y*vertex3.y + vertex3.z*vertex3.z);
 	vec4 textureColor = vec4(1,1,0,0);
 	if (hasTexture == 1) textureColor = texture( myTexture, UV);
@@ -37,7 +39,7 @@ void main()
 }
 float phong(vec4 lightPosition, vec3 lightColor , float power, float brightness)
 {
-	vec4 P = lightPosition0 - vertex2;//???
+	vec4 P = lightPosition - vertex2;//???
 	P = normalize(P);
 	P.w = 1;
 	P = reflect(P, normals);
@@ -49,7 +51,7 @@ float phong(vec4 lightPosition, vec3 lightColor , float power, float brightness)
 }
 float lambert(vec4 lightPosition, vec3 lightColor, float power)
 {
-	vec4 L = lightPosition0 - vertex2;
+	vec4 L = lightPosition - vertex2;
 	L = normalize(L);
 	L.w = 1;
 	float I = dot(L, normals); //???

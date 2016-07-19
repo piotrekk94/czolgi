@@ -5,10 +5,11 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
-//#include <glm/gtx/ro>
+//#include <glm/gtx/>
 
 #include "shader.hpp"
 #include "model.hpp"
+bool turn = false;
 float speed_x, speed_y;
 float camera = 10.0f;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -86,34 +87,49 @@ int main(int argc, char ** argv)
 	Model cube("models/cube.obj" , &Shader, VertexArrayID);
 	Model cube3("models/cube.obj" , &Shader, VertexArrayID);
 	Model cube2("models/zero.obj" , &Shader, VertexArrayID);
-	cube.textureLoad("./tekstura.bmp");
+	cube.textureLoad("./tekstura.png");
 
-	float angle_x = 0, angle_y = 0;
+	glm::vec4 lightPosition = glm::vec4(0,0,0,1);
+	Light light(lightPosition);
+	light.color = glm::vec3(1,1,1);
+
+	cube.light.push_back(light);
+	float angle_x = 0, angle_y = 0, dx = 0, dy = 0;
 	glm::mat4 PMatrix = glm::perspective(float(50 ), float(1024/768), 1.0f, 50.0f);
 	double time = glfwGetTime();
 //	double time2 = time;
 	do{
 		timeMeasure();
-	glm::mat4 VMatrix = glm::lookAt(
-			glm::vec3(camera, camera, camera),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
-	angle_x += speed_x * (glfwGetTime() - time);	
-	angle_y += speed_y * (glfwGetTime() - time);
-	time = glfwGetTime();
-	glm::mat4 ModelMatrix = glm::scale(glm::mat4(1.0f),glm::vec3(0.5f, 0.5f, 0.1f));
-	ModelMatrix = glm::translate(ModelMatrix, glm::vec3(-1.0f, -1.0f, -1.0f));
-	//glm::mat4 ModelMatrix2 = glm::translate(ModelMatrix, glm::vec3(2.0f, 2.0f, 2.0f));
-	ModelMatrix = glm::rotate(ModelMatrix, angle_x, glm::vec3(1,0,0));
-	ModelMatrix = glm::rotate(ModelMatrix, angle_y, glm::vec3(0,1,0));
+		glm::mat4 VMatrix = glm::lookAt(
+				glm::vec3(camera, camera, camera),
+				glm::vec3(0.0f, 0.0f, 0.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+		if (turn)
+		{
+		angle_x += speed_x * (glfwGetTime() - time);	
+		angle_y += speed_y * (glfwGetTime() - time);
+		}
+		else
+		{
+		dy += speed_x * (glfwGetTime() - time);	
+		dx -= speed_y * (glfwGetTime() - time);
+		}
+		time = glfwGetTime();
+		glm::mat4 ModelMatrix = glm::scale(glm::mat4(1.0f),glm::vec3(0.5f, 0.5f, 0.1f));
+		ModelMatrix = glm::translate(ModelMatrix, glm::vec3(-1.0f, -1.0f, -1.0f));
+		//glm::mat4 ModelMatrix2 = glm::translate(ModelMatrix, glm::vec3(2.0f, 2.0f, 2.0f));
+		ModelMatrix = glm::rotate(ModelMatrix, angle_x, glm::vec3(1,0,0));
+		ModelMatrix = glm::rotate(ModelMatrix, angle_y, glm::vec3(0,1,0));
 		drawScene();
 		mvp = PMatrix * VMatrix * ModelMatrix;
-	//	glm::mat4 mvp2 = PMatrix * VMatrix * ModelMatrix2;
+		//	glm::mat4 mvp2 = PMatrix * VMatrix * ModelMatrix2;
 		cube.setMMatrix(glm::mat4(1.0f));// reset
 		cube.scale(glm::vec3(0.5f, 0.5f, 0.1f));
-		cube.translate(glm::vec3(-1,-1,5));
+		cube.translate(glm::vec3(dx,dy,5));
 		cube.rotate(angle_x, glm::vec3(1,0,0));
 		cube.rotate(angle_y, glm::vec3(0,1,0));
+		cube.translate(glm::vec3(-0.5,-0.5,-0.5));
+
 		cube.setVMatrix(VMatrix);
 		cube.setPMatrix(PMatrix);
 		cube.setMVPMatrix(mvp);
@@ -130,7 +146,7 @@ int main(int argc, char ** argv)
 		cube3.setPMatrix(PMatrix);
 		cube3.draw();
 
-	//	drawCube(vertexbuffer, Shader);
+		//	drawCube(vertexbuffer, Shader);
 		glfwSwapBuffers(window); //
 		glfwPollEvents(); // od klawiszy
 	} // Check if the ESC key was pressed or the window was closed
@@ -161,6 +177,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
 	if (action == GLFW_PRESS)
 	{
+		if (key == GLFW_KEY_LEFT_SHIFT)
+			turn = true;
 		if (key == GLFW_KEY_LEFT) speed_y = -3.14;
 		if (key == GLFW_KEY_RIGHT) speed_y = 3.14;
 		if (key == GLFW_KEY_UP) speed_x = -3.14;
@@ -170,6 +188,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	if (action == GLFW_RELEASE) 
 	{
+		if (key == GLFW_KEY_LEFT_SHIFT)
+			turn = false;
 		speed_y = 0;
 		speed_x = 0;
 	}
