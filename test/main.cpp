@@ -9,7 +9,7 @@
 
 #include "shader.hpp"
 #include "model.hpp"
-bool turn = false;
+bool turn = false, lightMove = false;
 float speed_x, speed_y;
 float camera = 10.0f;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -95,6 +95,7 @@ int main(int argc, char ** argv)
 
 	cube.light.push_back(light);
 	float angle_x = 0, angle_y = 0, dx = 0, dy = 0;
+	float ldx = 0, ldy = 0;
 	glm::mat4 PMatrix = glm::perspective(float(50 ), float(1024/768), 1.0f, 50.0f);
 	double time = glfwGetTime();
 //	double time2 = time;
@@ -104,16 +105,25 @@ int main(int argc, char ** argv)
 				glm::vec3(camera, camera, camera),
 				glm::vec3(0.0f, 0.0f, 0.0f),
 				glm::vec3(0.0f, 1.0f, 0.0f));
-		if (turn)
+		if (lightMove)
 		{
-		angle_x += speed_x * (glfwGetTime() - time);	
-		angle_y += speed_y * (glfwGetTime() - time);
+			ldy += speed_x * (glfwGetTime() - time);	
+			ldx -= speed_y * (glfwGetTime() - time);
 		}
-		else
-		{
-		dy += speed_x * (glfwGetTime() - time);	
-		dx -= speed_y * (glfwGetTime() - time);
+		else{
+			if (turn)
+			{
+				angle_x += speed_x * (glfwGetTime() - time);	
+				angle_y += speed_y * (glfwGetTime() - time);
+			}
+			else
+			{
+				dy += speed_x * (glfwGetTime() - time);	
+				dx -= speed_y * (glfwGetTime() - time);
+			}
 		}
+
+		cube.light[0].position = glm::vec4(ldx,ldy,0,1);
 		time = glfwGetTime();
 		glm::mat4 ModelMatrix = glm::scale(glm::mat4(1.0f),glm::vec3(0.5f, 0.5f, 0.1f));
 		ModelMatrix = glm::translate(ModelMatrix, glm::vec3(-1.0f, -1.0f, -1.0f));
@@ -140,7 +150,7 @@ int main(int argc, char ** argv)
 		cube2.setPMatrix(PMatrix);
 		cube2.draw();
 		cube3.setMMatrix(glm::mat4(1));
-		cube3.translate(glm::vec3(0,0,0));
+		cube3.translate(glm::vec3(ldx,ldy,0));
 		cube3.scale(glm::vec3(0.1,0.1,0.1));
 		cube3.setVMatrix(VMatrix);
 		cube3.setPMatrix(PMatrix);
@@ -179,6 +189,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		if (key == GLFW_KEY_LEFT_SHIFT)
 			turn = true;
+		if (key == GLFW_KEY_L) lightMove = !lightMove;
 		if (key == GLFW_KEY_LEFT) speed_y = -3.14;
 		if (key == GLFW_KEY_RIGHT) speed_y = 3.14;
 		if (key == GLFW_KEY_UP) speed_x = -3.14;
