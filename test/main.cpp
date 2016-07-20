@@ -1,27 +1,27 @@
+#include <stdlib.h>
+#include <stdio.h>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <cstdio>
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <vector>
-//#include <glm/gtx/>
 
 #include "shader.hpp"
 #include "model.hpp"
-bool turn = false, lightMove = false;
+
+bool turn = false;
+bool lightMove = false;
 float speed_x, speed_y;
-float camera = 10.0f;
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-GLFWwindow* window; 
+float cameraZoom = 10.0f;
+GLFWwindow *window;
 GLuint VertexArrayID;
 	glm::mat4 mvp;
+
 static const GLfloat triangle[] = {
 
 	-0.3f, -0.3f, 0.0f, 1.0f,
 	0.3f, -0.3f, 0.0f, 1.0f,
 	0.0f,  0.3f, 0.0f, 1.0f,
 };
+
 static const GLfloat g_vertex_buffer_data[] = {
 	-1.0f,-1.0f,-1.0f,// 1.0f, // triangle 1 : begin
 	-1.0f,-1.0f, 1.0f,// 1.0f,
@@ -60,16 +60,18 @@ static const GLfloat g_vertex_buffer_data[] = {
 	-1.0f, 1.0f, 1.0f,// 1.0f,
 	1.0f,-1.0f, 1.0f,// 1.0f,
 };
-int drawScene();
-void timeMeasure();
-int drawCube(GLuint &vertexbuffer, ShaderProgram Shader);
+
 int initGL(int x, int y);
-void Display();
-int main(int argc, char ** argv)
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+void timeMeasure();
+
+int main(int argc, char **argv)
 {
 	initGL(1024, 768);
-	glClearColor(0,0,0.2,0);
-	//	glutMainloop();
+
+	glGenVertexArrays(1, &VertexArrayID);
+
 	ShaderProgram Shader("vertex.vert", "fragment.frag");
 	Shader.on();
 	// This will identify our vertex buffer
@@ -81,12 +83,12 @@ int main(int argc, char ** argv)
 	// Give our vertices to OpenGL.
 //	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
 
-	std::vector<GLfloat> vertex(g_vertex_buffer_data, g_vertex_buffer_data + (3 * 12 * 4) );
+	std::vector<GLfloat> vertex(g_vertex_buffer_data, g_vertex_buffer_data + (3 * 12 * 4));
 
 	std::vector<GLfloat> trianglev(triangle, triangle + 3 * 4);
-	Model cube("models/cube2.obj" , &Shader, VertexArrayID);
-	Model cube3("models/cube2.obj" , &Shader, VertexArrayID);
-	Model cube2("models/zero.obj" , &Shader, VertexArrayID);
+	Model cube("models/cube2.obj", &Shader, VertexArrayID);
+	Model cube3("models/cube2.obj", &Shader, VertexArrayID);
+	Model cube2("models/zero.obj", &Shader, VertexArrayID);
 	cube.textureLoad("./tekstura.png");
 
 	glm::vec4 lightPosition = glm::vec4(0,0,0,1);
@@ -96,28 +98,24 @@ int main(int argc, char ** argv)
 	cube.light.push_back(light);
 	float angle_x = 0, angle_y = 0, dx = 0, dy = 0;
 	float ldx = 0, ldy = 0;
-	glm::mat4 PMatrix = glm::perspective(float(50 ), float(1024/768), 1.0f, 50.0f);
+	glm::mat4 PMatrix = glm::perspective(50.0f, float(1024/768), 1.0f, 50.0f);
 	double time = glfwGetTime();
-//	double time2 = time;
+
 	do{
 		timeMeasure();
 		glm::mat4 VMatrix = glm::lookAt(
-				glm::vec3(camera, camera, camera),
+				glm::vec3(cameraZoom, cameraZoom, cameraZoom),
 				glm::vec3(0.0f, 0.0f, 0.0f),
 				glm::vec3(0.0f, 1.0f, 0.0f));
-		if (lightMove)
-		{
+		if (lightMove) {
 			ldy += speed_x * (glfwGetTime() - time);	
 			ldx -= speed_y * (glfwGetTime() - time);
 		}
-		else{
-			if (turn)
-			{
+		else {
+			if (turn) {
 				angle_x += speed_x * (glfwGetTime() - time);	
 				angle_y += speed_y * (glfwGetTime() - time);
-			}
-			else
-			{
+			} else {
 				dy += speed_x * (glfwGetTime() - time);	
 				dx -= speed_y * (glfwGetTime() - time);
 			}
@@ -127,12 +125,10 @@ int main(int argc, char ** argv)
 		time = glfwGetTime();
 		glm::mat4 ModelMatrix = glm::scale(glm::mat4(1.0f),glm::vec3(0.5f, 0.5f, 0.1f));
 		ModelMatrix = glm::translate(ModelMatrix, glm::vec3(-1.0f, -1.0f, -1.0f));
-		//glm::mat4 ModelMatrix2 = glm::translate(ModelMatrix, glm::vec3(2.0f, 2.0f, 2.0f));
 		ModelMatrix = glm::rotate(ModelMatrix, angle_x, glm::vec3(1,0,0));
 		ModelMatrix = glm::rotate(ModelMatrix, angle_y, glm::vec3(0,1,0));
-		drawScene();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		mvp = PMatrix * VMatrix * ModelMatrix;
-		//	glm::mat4 mvp2 = PMatrix * VMatrix * ModelMatrix2;
 		cube.setMMatrix(glm::mat4(1.0f));// reset
 		//cube.scale(glm::vec3(0.5f, 0.5f, 0.1f));
 		cube.translate(glm::vec3(dx,dy,1));
@@ -157,110 +153,112 @@ int main(int argc, char ** argv)
 		cube3.setPMatrix(PMatrix);
 		cube3.draw();
 
-		//	drawCube(vertexbuffer, Shader);
-		glfwSwapBuffers(window); //
-		glfwPollEvents(); // od klawiszy
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 	} // Check if the ESC key was pressed or the window was closed
-	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-			glfwWindowShouldClose(window) == 0 );
-	//Cleanup VBO
-	//glDeleteBuffers(1, &vertexbuffer);
+	while(glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
+		glfwWindowShouldClose(window) == 0);
+
 	glDeleteVertexArrays(1, &VertexArrayID);
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
+	return 0;
 }
-void timeMeasure()
+
+int initGL(int x, int y)
 {
-	static int counter;
-	static double time1 = glfwGetTime();
-	double time2 = glfwGetTime();
-	counter++;
-	if (time2 > 1 + time1)
-	{
-		fprintf(stderr,"%f ms/frame\n",(time2 - time1) * 1000 / counter);
-		time1 = time2;
-		counter = 0;
+	// Initialise GLFW
+	if(!glfwInit()) {
+		fprintf(stderr, "Failed to initialize GLFW\n");
+		getchar();
+		return -1;
 	}
-	return;
+
+	glfwWindowHint(GLFW_SAMPLES, 2); //  specifies the desired number of samples to use for multisampling. Zero disables multisampling. GLFW_DONT_CARE means the application has no preference.
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // We want OpenGL 3.3
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // specifies whether the OpenGL context should be forward-compatible, i.e. one where all functionality deprecated in the requested version of OpenGL is removed. This must only be used if the requested OpenGL version is 3.0 or above.
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // GLFW_OPENGL_PROFILE specifies which OpenGL profile to create the context for. Possible values are one of GLFW_OPENGL_CORE_PROFILE or GLFW_OPENGL_COMPAT_PROFILE, or GLFW_OPENGL_ANY_PROFILE to not request a specific profile. If requesting an OpenGL version below 3.2, GLFW_OPENGL_ANY_PROFILE must be used.
+
+	// Open a window and create its OpenGL context
+	window = glfwCreateWindow(x, y, "Tanks", NULL, NULL);
+	if (window == NULL) {
+		fprintf( stderr, "Failed to open GLFW window.\n");
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
+
+	// Initialize GLEW
+	glewExperimental = true; // Needed in openGL core profile
+	if (glewInit() != GLEW_OK) {
+		fprintf(stderr, "Failed to initialize GLEW\n");
+		return -1;
+	}
+
+	// Ensure we can capture the escape key being pressed below
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+
+	//  Makes the cursor invisible when it is over the client area of the window but does not restrict the cursor from leaving.
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+	// Keyborard tokens handling
+	glfwSetKeyCallback(window, key_callback);
+
+	// Mouse wheel handling
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// Background color
+	glClearColor(0,0,0.2,0);
+
+	// z-bufor
+	glEnable(GL_DEPTH_TEST);
+	
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS);
+
+	// Cull triangles which normal is not towards the camera
+	glEnable(GL_CULL_FACE);
+	return 0;
 }
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-	if (action == GLFW_PRESS)
-	{
-		if (key == GLFW_KEY_LEFT_SHIFT)
-			turn = true;
+	if (action == GLFW_PRESS) {
+		if (key == GLFW_KEY_LEFT_SHIFT) turn = true;
 		if (key == GLFW_KEY_L) lightMove = !lightMove;
 		if (key == GLFW_KEY_LEFT) speed_y = -3.14;
 		if (key == GLFW_KEY_RIGHT) speed_y = 3.14;
 		if (key == GLFW_KEY_UP) speed_x = -3.14;
 		if (key == GLFW_KEY_DOWN) speed_x = 3.14;
-		if (key == GLFW_KEY_W) camera += 0.5f;
-		if (key == GLFW_KEY_S) camera -= 0.5f;
 	}
-	if (action == GLFW_RELEASE) 
-	{
+	if (action == GLFW_RELEASE) {
 		if (key == GLFW_KEY_LEFT_SHIFT)
 			turn = false;
 		speed_y = 0;
 		speed_x = 0;
 	}
 }
-int drawCube(GLuint &vertexbuffer,ShaderProgram Shader)
+
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
-	GLuint Shadermpv = Shader.getUniformLocation("mvp");
-	glBindVertexArray(VertexArrayID);
-	glUniformMatrix4fv(Shadermpv, 1, false, glm::value_ptr(mvp));
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glVertexAttribPointer(
-			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-			4,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-			);
-	// Draw the triangle !
-	glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-	glDisableVertexAttribArray(0);
-	glBindVertexArray(0);
-	return 0;
-}
-int drawScene()
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	return 0;
+	if (yoffset == 1) {
+		cameraZoom -= 0.5f;
+	} else if (yoffset == -1) {
+		cameraZoom += 0.5f;
+	}
 }
 
-int initGL(int x, int y) //??? do poprawy
+void timeMeasure()
 {
-	glfwInit();
-	//	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // We want OpenGL 3.3
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	//	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-	//	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //We don't want the old OpenGL 
-
-
-	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( x, y, "Tutorial 01", NULL, NULL);
-	if( window == NULL ){
-		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
-		glfwTerminate();
-		return -1;
+	static int counter;
+	static double time1 = glfwGetTime();
+	double time2 = glfwGetTime();
+	counter++;
+	if (time2 > 1 + time1) {
+		fprintf(stderr,"%f ms/frame\n",(time2 - time1) * 1000 / counter);
+		time1 = time2;
+		counter = 0;
 	}
-	glfwMakeContextCurrent(window); // Initialize GLEW
-	glewExperimental=true; // Needed in core profile
-	if (glewInit() != GLEW_OK) {
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		return -1;
-	}
-	// aktywuj VAO
-	glGenVertexArrays(1, &VertexArrayID);
-	// aktywuj VAO
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSetKeyCallback(window, key_callback);
-	glEnable(GL_DEPTH_TEST); // z-bufor
-	return 0;
 }
