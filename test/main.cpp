@@ -84,8 +84,8 @@ int main(int argc, char ** argv)
 	std::vector<GLfloat> vertex(g_vertex_buffer_data, g_vertex_buffer_data + (3 * 12 * 4) );
 
 	std::vector<GLfloat> trianglev(triangle, triangle + 3 * 4);
-	Model cube("models/cube.obj" , &Shader, VertexArrayID);
-	Model cube3("models/cube.obj" , &Shader, VertexArrayID);
+	Model cube("models/cube2.obj" , &Shader, VertexArrayID);
+	Model cube3("models/cube2.obj" , &Shader, VertexArrayID);
 	Model cube2("models/zero.obj" , &Shader, VertexArrayID);
 	cube.textureLoad("./tekstura.png");
 

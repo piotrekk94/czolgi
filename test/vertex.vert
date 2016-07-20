@@ -20,6 +20,6 @@ void main()
 	vertex2 = vec4(vertex, 1);
 	gl_Position = P * V * M * vertex2;
 	UV = vec2(vertexTexture.x, 1.0 - vertexTexture.y);
-	normals = normalize(V * M * vec4( Normals, 1)) ;
+	normals =vec4(Normals , 0) ;
 	vec4 actualLightPosition = V * lightPosition[0];
 }

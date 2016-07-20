@@ -22,6 +22,7 @@ float phong(vec4 lightPosition, vec3 lightColor , float power, float brightness)
 vec3 simpleShading(vec3 material, vec3 light, float distance);
 float lambert(vec4 lightPosition, vec3 lightColor, float power);
 //
+vec4 norm = V * M * normalize( (normals));
 void main()
 {
 	vec4 actualLightPosition;
@@ -36,14 +37,13 @@ void main()
 	vec4 textureColor = vec4(1,1,0,0);
 	if (hasTexture == 1) textureColor = texture( myTexture, UV);
 	color.rgb = textureColor.rgb * ambient + simpleShading(textureColor.rgb, lightColor[0] * Il , d*d);
-//	color.rgb += simpleShading(textureColor.rgb , lightColor[0] * Ip , d * d); //ostre jazdy
+	color.rgb += simpleShading(textureColor.rgb , lightColor[0] * Ip , d * d); //ostre jazdy
 //	color.rgb = lightColor[0] * Il;
 }
 float phong(vec4 lightPosition, vec3 lightColor , float power, float brightness)
 {
-	vec4 norm = normalize(normals);
 	vec4 P = normalize(-toLight);//???
-//	P = reflect(P, norm);
+	P = reflect(P, norm);
 	vec4 V = normalize(toViewer);
 	float I = pow(clamp(dot(P, V), 0.0, 1.0), brightness);
 	return I * power;
@@ -51,7 +51,6 @@ float phong(vec4 lightPosition, vec3 lightColor , float power, float brightness)
 }
 float lambert(vec4 lightPosition, vec3 lightColor, float power)
 {
-	vec4 norm = normalize(normals);
 	vec4 L = normalize(toLight);
 	float I = dot(norm, L); //???
 	return clamp(I, 0.0f, 1.0f) * power;
