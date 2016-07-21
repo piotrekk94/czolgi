@@ -8,19 +8,12 @@
 #include "model.hpp"
 
 bool turn = false;
-bool lightMove = false;
+bool lightShift = false;
 float speed_x, speed_y;
 float cameraZoom = 10.0f;
 GLFWwindow *window;
 GLuint VertexArrayID;
-	glm::mat4 mvp;
-
-static const GLfloat triangle[] = {
-
-	-0.3f, -0.3f, 0.0f, 1.0f,
-	0.3f, -0.3f, 0.0f, 1.0f,
-	0.0f,  0.3f, 0.0f, 1.0f,
-};
+glm::mat4 mvp;
 
 static const GLfloat g_vertex_buffer_data[] = {
 	-1.0f,-1.0f,-1.0f,// 1.0f, // triangle 1 : begin
@@ -74,18 +67,9 @@ int main(int argc, char **argv)
 
 	ShaderProgram Shader("vertex.vert", "fragment.frag");
 	Shader.on();
-	// This will identify our vertex buffer
-	// Generate 1 buffer, put the resulting identifier in vertexbuffer
-//		GLuint vertexbuffer;
-//	glGenBuffers(1, &vertexbuffer);
-	// The following commands will talk about our 'vertexbuffer' buffer
-//	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	// Give our vertices to OpenGL.
-//	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
 
 	std::vector<GLfloat> vertex(g_vertex_buffer_data, g_vertex_buffer_data + (3 * 12 * 4));
 
-	std::vector<GLfloat> trianglev(triangle, triangle + 3 * 4);
 	Model cube("models/cube2.obj", &Shader, VertexArrayID);
 	Model cube3("models/cube2.obj", &Shader, VertexArrayID);
 	Model cube2("models/zero.obj", &Shader, VertexArrayID);
@@ -98,25 +82,25 @@ int main(int argc, char **argv)
 	cube.light.push_back(light);
 	float angle_x = 0, angle_y = 0, dx = 0, dy = 0;
 	float ldx = 0, ldy = 0;
-	glm::mat4 PMatrix = glm::perspective(50.0f, float(1024/768), 1.0f, 50.0f);
+	glm::mat4 ProjectionMatrix = glm::perspective(50.0f, float(1024/768), 1.0f, 50.0f);
 	double time = glfwGetTime();
 
 	do{
 		timeMeasure();
-		glm::mat4 VMatrix = glm::lookAt(
-				glm::vec3(cameraZoom, cameraZoom, cameraZoom),
-				glm::vec3(0.0f, 0.0f, 0.0f),
-				glm::vec3(0.0f, 1.0f, 0.0f));
-		if (lightMove) {
-			ldy += speed_x * (glfwGetTime() - time);	
+		glm::mat4 ViewMatrix = glm::lookAt(
+			glm::vec3(cameraZoom, cameraZoom, cameraZoom),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f));
+		if (lightShift) {
+			ldy += speed_x * (glfwGetTime() - time);
 			ldx -= speed_y * (glfwGetTime() - time);
 		}
 		else {
 			if (turn) {
-				angle_x += speed_x * (glfwGetTime() - time);	
+				angle_x += speed_x * (glfwGetTime() - time);
 				angle_y += speed_y * (glfwGetTime() - time);
 			} else {
-				dy += speed_x * (glfwGetTime() - time);	
+				dy += speed_x * (glfwGetTime() - time);
 				dx -= speed_y * (glfwGetTime() - time);
 			}
 		}
@@ -128,7 +112,7 @@ int main(int argc, char **argv)
 		ModelMatrix = glm::rotate(ModelMatrix, angle_x, glm::vec3(1,0,0));
 		ModelMatrix = glm::rotate(ModelMatrix, angle_y, glm::vec3(0,1,0));
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		mvp = PMatrix * VMatrix * ModelMatrix;
+		mvp = ProjectionMatrix * ViewMatrix * ModelMatrix;
 		cube.setMMatrix(glm::mat4(1.0f));// reset
 		//cube.scale(glm::vec3(0.5f, 0.5f, 0.1f));
 		cube.translate(glm::vec3(dx,dy,1));
@@ -136,21 +120,21 @@ int main(int argc, char **argv)
 		cube.rotate(angle_y, glm::vec3(0,1,0));
 		cube.translate(glm::vec3(-0.5,-0.5,-0.5));
 
-		cube.setVMatrix(VMatrix);
-		cube.setPMatrix(PMatrix);
+		cube.setVMatrix(ViewMatrix);
+		cube.setPMatrix(ProjectionMatrix);
 		cube.setMVPMatrix(mvp);
 		cube.draw();
 		cube2.setMMatrix(glm::mat4(1));
 		cube2.translate(glm::vec3(0,0,0));
-		cube2.setVMatrix(VMatrix);
-		cube2.setPMatrix(PMatrix);
+		cube2.setVMatrix(ViewMatrix);
+		cube2.setPMatrix(ProjectionMatrix);
 		cube2.draw();
 		cube3.setMMatrix(glm::mat4(1));
 		cube.translate(glm::vec3(-0.5,-0.5,-0.5));
 		cube3.translate(glm::vec3(ldx,ldy,0));
 		cube3.scale(glm::vec3(0.1,0.1,0.1));
-		cube3.setVMatrix(VMatrix);
-		cube3.setPMatrix(PMatrix);
+		cube3.setVMatrix(ViewMatrix);
+		cube3.setPMatrix(ProjectionMatrix);
 		cube3.draw();
 
 		glfwSwapBuffers(window);
@@ -214,7 +198,7 @@ int initGL(int x, int y)
 
 	// z-bufor
 	glEnable(GL_DEPTH_TEST);
-	
+
 	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LESS);
 
@@ -226,16 +210,37 @@ int initGL(int x, int y)
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 	if (action == GLFW_PRESS) {
-		if (key == GLFW_KEY_LEFT_SHIFT) turn = true;
-		if (key == GLFW_KEY_L) lightMove = !lightMove;
-		if (key == GLFW_KEY_LEFT) speed_y = -3.14;
-		if (key == GLFW_KEY_RIGHT) speed_y = 3.14;
-		if (key == GLFW_KEY_UP) speed_x = -3.14;
-		if (key == GLFW_KEY_DOWN) speed_x = 3.14;
+		switch (key) {
+		case GLFW_KEY_LEFT_CONTROL:
+			turn = true;
+			break;
+		case GLFW_KEY_LEFT_ALT:
+			lightShift = true;
+			break;
+		case GLFW_KEY_LEFT:
+			speed_y = -3.14;
+			break;
+		case GLFW_KEY_RIGHT:
+			speed_y = 3.14;
+			break;
+		case GLFW_KEY_UP:
+			speed_x = -3.14;
+			break;
+		case GLFW_KEY_DOWN:
+			speed_x = 3.14;
+			break;
+		}
 	}
+
 	if (action == GLFW_RELEASE) {
-		if (key == GLFW_KEY_LEFT_SHIFT)
+		switch (key) {
+		case GLFW_KEY_LEFT_CONTROL:
 			turn = false;
+			break;
+		case GLFW_KEY_LEFT_ALT:
+			lightShift = false;
+			break;
+		}
 		speed_y = 0;
 		speed_x = 0;
 	}
@@ -257,7 +262,7 @@ void timeMeasure()
 	double time2 = glfwGetTime();
 	counter++;
 	if (time2 > 1 + time1) {
-		fprintf(stderr,"%f ms/frame\n",(time2 - time1) * 1000 / counter);
+		fprintf(stderr,"%f ms/frame\n", (time2 - time1) * 1000 / counter);
 		time1 = time2;
 		counter = 0;
 	}
