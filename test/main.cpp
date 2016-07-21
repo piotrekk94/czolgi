@@ -10,7 +10,7 @@
 bool turn = false;
 bool lightShift = false;
 float speed_x, speed_y;
-float cameraZoom = 10.0f;
+float FoV = 45.0f;
 GLFWwindow *window;
 GLuint VertexArrayID;
 glm::mat4 mvp;
@@ -56,7 +56,6 @@ static const GLfloat g_vertex_buffer_data[] = {
 
 int initGL(int x, int y);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-void cursor_enter_callback(GLFWwindow *window, int entered);
 static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void timeMeasure();
@@ -84,13 +83,19 @@ int main(int argc, char **argv)
 	cube.light.push_back(light);
 	float angle_x = 0, angle_y = 0, dx = 0, dy = 0;
 	float ldx = 0, ldy = 0;
-	glm::mat4 ProjectionMatrix = glm::perspective(50.0f, float(1024/768), 1.0f, 50.0f);
 	double time = glfwGetTime();
 
 	do{
 		timeMeasure();
+
+		glm::mat4 ProjectionMatrix = glm::perspective(
+	    		FoV,         // The horizontal Field of View, in degrees : the amount of "zoom". Think "camera lens". Usually between 90° (extra wide) and 30° (quite zoomed in)
+	    		4.0f / 3.0f, // Aspect Ratio. Depends on the size of your window. Notice that 4/3 == 800/600 == 1280/960, sounds familiar ?
+	    		0.1f,        // Near clipping plane. Keep as big as possible, or you'll get precision issues.
+	    		100.0f       // Far clipping plane. Keep as little as possible.
+		);
 		glm::mat4 ViewMatrix = glm::lookAt(
-			glm::vec3(cameraZoom, cameraZoom, cameraZoom),
+			glm::vec3(4.0f, 3.0f, 3.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f));
 		if (lightShift) {
@@ -186,14 +191,13 @@ int initGL(int x, int y)
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-	//  Makes the cursor invisible when it is over the client area of the window but does not restrict the cursor from leaving.
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	// This will hide the cursor and lock it to the specified window
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// Keyborard tokens handling
 	glfwSetKeyCallback(window, key_callback);
 
-	// Cursor enter/leave events and its position handling
-	glfwSetCursorEnterCallback(window, cursor_enter_callback);
+	// Cursor position handling
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
 
 	// Mouse wheel handling
@@ -252,15 +256,6 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 	}
 }
 
-void cursor_enter_callback(GLFWwindow *window, int entered)
-{
-	if (entered) {
-		// The cursor entered the client area of the window
-	} else {
-		// The cursor left the client area of the window
-	}
-}
-
 static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 {
 	fprintf(stderr,"xpos: %lf; ypos: %lf\n", xpos, ypos);
@@ -269,9 +264,9 @@ static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
 	if (yoffset == 1) {
-		cameraZoom -= 0.5f;
+		FoV -= 0.1f;
 	} else if (yoffset == -1) {
-		cameraZoom += 0.5f;
+		FoV += 0.1f;
 	}
 }
 
