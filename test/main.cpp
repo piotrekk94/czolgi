@@ -9,56 +9,21 @@
 
 bool turn = false;
 bool lightShift = false;
-float speed_x, speed_y;
-float FoV = 45.0f;
+float move_x, move_y;
+float FoV = 45.0;
 GLFWwindow *window;
 GLuint VertexArrayID;
 glm::mat4 mvp;
-
-static const GLfloat g_vertex_buffer_data[] = {
-	-1.0f,-1.0f,-1.0f,// 1.0f, // triangle 1 : begin
-	-1.0f,-1.0f, 1.0f,// 1.0f,
-	-1.0f, 1.0f, 1.0f,// 1.0f, // triangle 1 : end
-	1.0f, 1.0f,-1.0f,// 1.0f, // triangle 2 : begin
-	-1.0f,-1.0f,-1.0f,// 1.0f,
-	-1.0f, 1.0f,-1.0f,// 1.0f, // triangle 2 : end
-	1.0f,-1.0f, 1.0f,// 1.0f,
-	-1.0f,-1.0f,-1.0f,// 1.0f,
-	1.0f,-1.0f,-1.0f,// 1.0f,
-	1.0f, 1.0f,-1.0f,// 1.0f,
-	1.0f,-1.0f,-1.0f,// 1.0f,
-	-1.0f,-1.0f,-1.0f,// 1.0f,
-	-1.0f,-1.0f,-1.0f,// 1.0f,
-	-1.0f, 1.0f, 1.0f,// 1.0f,
-	-1.0f, 1.0f,-1.0f,// 1.0f,
-	1.0f,-1.0f, 1.0f,// 1.0f,
-	-1.0f,-1.0f, 1.0f,// 1.0f,
-	-1.0f,-1.0f,-1.0f,// 1.0f,
-	-1.0f, 1.0f, 1.0f,// 1.0f,
-	-1.0f,-1.0f, 1.0f,// 1.0f,
-	1.0f,-1.0f, 1.0f,// 1.0f,
-	1.0f, 1.0f, 1.0f,// 1.0f,
-	1.0f,-1.0f,-1.0f,// 1.0f,
-	1.0f, 1.0f,-1.0f,// 1.0f,
-	1.0f,-1.0f,-1.0f,// 1.0f,
-	1.0f, 1.0f, 1.0f,// 1.0f,
-	1.0f,-1.0f, 1.0f,// 1.0f,
-	1.0f, 1.0f, 1.0f,// 1.0f,
-	1.0f, 1.0f,-1.0f,// 1.0f,
-	-1.0f, 1.0f,-1.0f,// 1.0f,
-	1.0f, 1.0f, 1.0f,// 1.0f,
-	-1.0f, 1.0f,-1.0f,// 1.0f,
-	-1.0f, 1.0f, 1.0f,// 1.0f,
-	1.0f, 1.0f, 1.0f,// 1.0f,
-	-1.0f, 1.0f, 1.0f,// 1.0f,
-	1.0f,-1.0f, 1.0f,// 1.0f,
-};
 
 int initGL(int x, int y);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void timeMeasure();
+float cameraPositionX = 0;
+float cameraPositionY = 0;
+double xposOld;
+double yposOld;
 
 int main(int argc, char **argv)
 {
@@ -68,8 +33,6 @@ int main(int argc, char **argv)
 
 	ShaderProgram Shader("vertex.vert", "fragment.frag");
 	Shader.on();
-
-	std::vector<GLfloat> vertex(g_vertex_buffer_data, g_vertex_buffer_data + (3 * 12 * 4));
 
 	Model cube("models/cube2.obj", &Shader, VertexArrayID);
 	Model cube3("models/cube2.obj", &Shader, VertexArrayID);
@@ -95,20 +58,21 @@ int main(int argc, char **argv)
 	    		100.0f       // Far clipping plane. Keep as little as possible.
 		);
 		glm::mat4 ViewMatrix = glm::lookAt(
-			glm::vec3(4.0f, 3.0f, 3.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::vec3(cameraPositionX, cameraPositionY, 5.0f), // the position of your camera, in world space
+			glm::vec3(0.0f, 0.0f, 0.0f), // where you want to look at, in world space
+			glm::vec3(0.0f, 1.0f, 0.0f) // probably glm::vec3(0,1,0), but (0,-1,0) would make you looking upside-down, which can be great too
+		);
 		if (lightShift) {
-			ldy += speed_x * (glfwGetTime() - time);
-			ldx -= speed_y * (glfwGetTime() - time);
+			ldy += move_x * (glfwGetTime() - time);
+			ldx -= move_y * (glfwGetTime() - time);
 		}
 		else {
 			if (turn) {
-				angle_x += speed_x * (glfwGetTime() - time);
-				angle_y += speed_y * (glfwGetTime() - time);
+				angle_x += move_x * (glfwGetTime() - time);
+				angle_y += move_y * (glfwGetTime() - time);
 			} else {
-				dy += speed_x * (glfwGetTime() - time);
-				dx -= speed_y * (glfwGetTime() - time);
+				dy += move_x * (glfwGetTime() - time);
+				dx -= move_y * (glfwGetTime() - time);
 			}
 		}
 
@@ -131,11 +95,13 @@ int main(int argc, char **argv)
 		cube.setPMatrix(ProjectionMatrix);
 		cube.setMVPMatrix(mvp);
 		cube.draw();
+
 		cube2.setMMatrix(glm::mat4(1));
 		cube2.translate(glm::vec3(0,0,0));
 		cube2.setVMatrix(ViewMatrix);
 		cube2.setPMatrix(ProjectionMatrix);
 		cube2.draw();
+
 		cube3.setMMatrix(glm::mat4(1));
 		cube.translate(glm::vec3(-0.5,-0.5,-0.5));
 		cube3.translate(glm::vec3(ldx,ldy,0));
@@ -147,7 +113,7 @@ int main(int argc, char **argv)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	} // Check if the ESC key was pressed or the window was closed
-	while(glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
+	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
 		glfwWindowShouldClose(window) == 0);
 
 	glDeleteVertexArrays(1, &VertexArrayID);
@@ -191,14 +157,17 @@ int initGL(int x, int y)
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-	// This will hide the cursor and lock it to the specified window
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
 	// Keyborard tokens handling
 	glfwSetKeyCallback(window, key_callback);
 
+	// This will hide the cursor and lock it to the specified window
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	// Cursor position handling
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
+	glfwGetCursorPos(window, &xposOld, &yposOld);
+
+	fprintf(stderr,"xposOld: %lf; yposOld: %lf\n", xposOld, yposOld);
 
 	// Mouse wheel handling
 	glfwSetScrollCallback(window, scroll_callback);
@@ -228,16 +197,16 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 			lightShift = true;
 			break;
 		case GLFW_KEY_LEFT:
-			speed_y = -3.14;
+			move_y = -3.14;
 			break;
 		case GLFW_KEY_RIGHT:
-			speed_y = 3.14;
+			move_y = 3.14;
 			break;
 		case GLFW_KEY_UP:
-			speed_x = -3.14;
+			move_x = -3.14;
 			break;
 		case GLFW_KEY_DOWN:
-			speed_x = 3.14;
+			move_x = 3.14;
 			break;
 		}
 	}
@@ -251,13 +220,24 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 			lightShift = false;
 			break;
 		}
-		speed_y = 0;
-		speed_x = 0;
+		move_y = 0;
+		move_x = 0;
 	}
 }
 
 static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 {
+	if (xposOld - xpos > 0) {
+		cameraPositionX += 0.1f;
+	} else if (xposOld - xpos < 0) {
+		cameraPositionX -= 0.1f;
+	} else if (yposOld - ypos > 0) {
+		cameraPositionY += 0.1f;
+	} else if (yposOld - ypos < 0) {
+		cameraPositionY -= 0.1f;
+	}
+	xposOld = xpos;
+	yposOld = ypos;
 	fprintf(stderr,"xpos: %lf; ypos: %lf\n", xpos, ypos);
 }
 
