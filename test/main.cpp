@@ -56,6 +56,8 @@ static const GLfloat g_vertex_buffer_data[] = {
 
 int initGL(int x, int y);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+void cursor_enter_callback(GLFWwindow *window, int entered);
+static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void timeMeasure();
 
@@ -190,11 +192,15 @@ int initGL(int x, int y)
 	// Keyborard tokens handling
 	glfwSetKeyCallback(window, key_callback);
 
+	// Cursor enter/leave events and its position handling
+	glfwSetCursorEnterCallback(window, cursor_enter_callback);
+	glfwSetCursorPosCallback(window, cursor_pos_callback);
+
 	// Mouse wheel handling
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// Background color
-	glClearColor(0,0,0.2,0);
+	glClearColor(0.0f, 0.0f, 0.2f, 0.0f);
 
 	// z-bufor
 	glEnable(GL_DEPTH_TEST);
@@ -244,6 +250,20 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 		speed_y = 0;
 		speed_x = 0;
 	}
+}
+
+void cursor_enter_callback(GLFWwindow *window, int entered)
+{
+	if (entered) {
+		// The cursor entered the client area of the window
+	} else {
+		// The cursor left the client area of the window
+	}
+}
+
+static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
+{
+	fprintf(stderr,"xpos: %lf; ypos: %lf\n", xpos, ypos);
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
