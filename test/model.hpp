@@ -14,13 +14,13 @@ struct Light
 {
 	glm::vec4 position;
 	glm::vec3 color = glm::vec3(1,1,1);
-	GLfloat power = 200;
+	GLfloat power = 1;
 	GLint type = 1; // 1 - punktowe;
-/*	Light(glm::vec4 p, glm::vec3 color = glm::vec3(1,1,1))
+	Light(glm::vec4 p, glm::vec3 color = glm::vec3(1,1,1))
 	{
 		position = p;
 		this -> color = color;
-	}*/
+	}
 };
 
 class Model

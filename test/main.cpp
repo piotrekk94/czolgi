@@ -115,6 +115,11 @@ int mainLoop()
 	Light light(lightPosition);
 	light.color = glm::vec3(1,1,1);
 
+	light.power = 5;
+	cube.light.push_back(light);
+	light.type = 2;
+	light.power = 0.3;
+	light.position = glm::vec4(1,1,1,0);
 	cube.light.push_back(light);
 	float angle_x = 0, angle_y = 0, dx = 0, dy = 0;
 	float ldx = 0, ldy = 0;
