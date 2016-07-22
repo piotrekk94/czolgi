@@ -9,11 +9,16 @@ int Model::draw()
 	glUniformMatrix4fv(	shader->getUniformLocation("P"), 1, false, glm::value_ptr(PMatrix));
 	glUniform1i(shader->getUniformLocation("hasTexture"), hasTexture);
 	//
-	if (light.size() > 0)
+	glUniform1i(shader->getUniformLocation("lightNumber"), light.size());
+	for (unsigned int i = 0 ; i < light.size() ; i++)
 	{
-		glUniform4f(shader->getUniformLocation("lightPosition[0]"), light[0].position.x,light[0].position.y,light[0].position.z,light[0].position.w);
-
-		glUniform3f(shader->getUniformLocation("lightColor[0]"), light[0].color.x,light[0].color.y,light[0].color.z);
+		std::ostringstream oss;
+		oss << "light[" << i;
+		glUniform4f( shader->getUniformLocation(oss.str() + "].position"), light[i].position.x, light[i].position.y, light[i].position.z, light[i].position.w);
+		glUniform3f( shader->getUniformLocation(oss.str() + "].color"), light[i].color.r, light[i].color.g, light[i].color.b);
+		glUniform1f( shader->getUniformLocation(oss.str() + "].power"), light[i].power);
+		glUniform1i( shader->getUniformLocation(oss.str() + "].type"), light[i].type);
+		
 	}
 	//
 	glBindVertexArray(vertexArrayID);
@@ -38,6 +43,15 @@ Model::Model(std::vector<GLfloat> &inVertex, ShaderProgram * shader, GLuint vert
 	glBindVertexArray(this->vertexArrayID);
 	assignVBO("vertex", vertexbuffer, 3);
 	glBindVertexArray(0);
+}
+int Model::enableLight()
+{
+	glUniformBlockBinding(shader->getID(), shader->getUniformBlockIndex("LightBlock"), 1);//???
+	glGenBuffers(1, &lightBuffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, lightBuffer);
+	glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(light[0]), &light[0],GL_DYNAMIC_DRAW);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 1, lightBuffer);
+	return 0;
 }
 Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID, unsigned *whichMesh)
 {
@@ -74,7 +88,7 @@ Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID
 		aiMesh * mesh = scene->mMeshes[i];
 		int iMeshFaces = mesh->mNumFaces;
 		if (mesh->HasTextureCoords(0))
-			hasTexture = 1;
+			hasTextureCoords = 1;
 		else
 			fprintf(stderr,"plik nie współrzędnych teksturowania: %s\n", fileName);
 		if (!mesh->HasNormals())
@@ -134,22 +148,29 @@ Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID
 	verticesAmount = totalVertices;
 	if (whichMesh != nullptr)
 		*whichMesh = scene -> mNumMeshes;
+	enableLight();
 }
 Model::~Model()
 {
 	glDeleteTextures(1,&texture);
 }
-void Model::textureLoad(const char * fileName)
+int Model::textureLoad(const char * fileName)
 {
-	int width, height, channels;
-	unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	// 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	//	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	if (hasTextureCoords)
+	{
+		int width, height, channels;
+		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		// 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		//	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		hasTexture = 1;
+		return 0;
+	}
+	return 1;
 }
 int Model::setMVPMatrix(glm::mat4 MVPMatrix)
 {

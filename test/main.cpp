@@ -78,10 +78,17 @@ int main(int argc, char **argv)
 	cube.textureLoad("./tekstura.png");
 
 	glm::vec4 lightPosition = glm::vec4(0,0,0,1);
-	Light light(lightPosition);
+	Light light;
+	light.position = (lightPosition);
 	light.color = glm::vec3(1,1,1);
-
+	light.power = 200;
+	Light moonLight;
+	moonLight.position = (glm::vec4(-1,-1,-1,0));
+	moonLight.power = 0.4;
+	moonLight.type = 2;
 	cube.light.push_back(light);
+	cube.light.push_back(moonLight);
+	fprintf(stderr,"ilosc swiatel: %lu wielkosc struktury: %lu\n",cube.light.size(),sizeof(cube.light[0]));
 	float angle_x = 0, angle_y = 0, dx = 0, dy = 0;
 	float ldx = 0, ldy = 0;
 	glm::mat4 ProjectionMatrix = glm::perspective(50.0f, float(1024/768), 1.0f, 50.0f);
@@ -90,9 +97,9 @@ int main(int argc, char **argv)
 	do{
 		timeMeasure();
 		glm::mat4 ViewMatrix = glm::lookAt(
-			glm::vec3(cameraZoom, cameraZoom, cameraZoom),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
+				glm::vec3(cameraZoom, cameraZoom, cameraZoom),
+				glm::vec3(0.0f, 0.0f, 0.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f));
 		if (lightShift) {
 			ldy += speed_x * (glfwGetTime() - time);
 			ldx -= speed_y * (glfwGetTime() - time);
@@ -143,7 +150,7 @@ int main(int argc, char **argv)
 		glfwPollEvents();
 	} // Check if the ESC key was pressed or the window was closed
 	while(glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-		glfwWindowShouldClose(window) == 0);
+			glfwWindowShouldClose(window) == 0);
 
 	glDeleteVertexArrays(1, &VertexArrayID);
 
@@ -217,35 +224,35 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 {
 	if (action == GLFW_PRESS) {
 		switch (key) {
-		case GLFW_KEY_LEFT_CONTROL:
-			turn = true;
-			break;
-		case GLFW_KEY_LEFT_ALT:
-			lightShift = true;
-			break;
-		case GLFW_KEY_LEFT:
-			speed_y = -3.14;
-			break;
-		case GLFW_KEY_RIGHT:
-			speed_y = 3.14;
-			break;
-		case GLFW_KEY_UP:
-			speed_x = -3.14;
-			break;
-		case GLFW_KEY_DOWN:
-			speed_x = 3.14;
-			break;
+			case GLFW_KEY_LEFT_CONTROL:
+				turn = true;
+				break;
+			case GLFW_KEY_LEFT_ALT:
+				lightShift = true;
+				break;
+			case GLFW_KEY_LEFT:
+				speed_y = -3.14;
+				break;
+			case GLFW_KEY_RIGHT:
+				speed_y = 3.14;
+				break;
+			case GLFW_KEY_UP:
+				speed_x = -3.14;
+				break;
+			case GLFW_KEY_DOWN:
+				speed_x = 3.14;
+				break;
 		}
 	}
 
 	if (action == GLFW_RELEASE) {
 		switch (key) {
-		case GLFW_KEY_LEFT_CONTROL:
-			turn = false;
-			break;
-		case GLFW_KEY_LEFT_ALT:
-			lightShift = false;
-			break;
+			case GLFW_KEY_LEFT_CONTROL:
+				turn = false;
+				break;
+			case GLFW_KEY_LEFT_ALT:
+				lightShift = false;
+				break;
 		}
 		speed_y = 0;
 		speed_x = 0;

@@ -1,8 +1,16 @@
 #include "shader.hpp"
 #define DEBUG 1
+GLuint ShaderProgram::getUniformBlockIndex(const char *name)
+{
+	return glGetUniformBlockIndex(programID, name);
+}
 GLuint ShaderProgram::getUniformLocation(const char *name)
 {
 	return glGetUniformLocation(programID, name);
+}
+GLuint ShaderProgram::getUniformLocation(const std::string name)
+{
+	return glGetUniformLocation(programID, name.c_str());
 }
 GLuint ShaderProgram::getAttribLocation(const char *name)
 {
