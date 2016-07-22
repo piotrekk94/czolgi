@@ -40,12 +40,16 @@ class Model
 		void translate(glm::vec3 vector);
 		void scale(glm::vec3 vector);
 		static std::vector<Light> light;
+		static float ambient;
+		float shinniness = 100;
+		glm::vec4 color = glm::vec4(1,1,0,0);
+		glm::vec4 specularColor = glm::vec4(1,1,1,0);
 	private:
 		int enableLight();
 		//std::vector<GLfloat> vertex;
 		int verticesAmount;
 		ShaderProgram *shader = nullptr;
-		int angle_x, angle_y, angle_z;
+		int angle_x, angle_y, angle_z; // nic nie robi
 		GLint hasTexture = 0;
 		GLint hasTextureCoords = 0;
 		void assignVBO(const char * name, GLuint buf, int points);
@@ -56,7 +60,7 @@ class Model
 		GLuint texture;
 		GLuint vertexArrayID;
 		glm::mat4 MMatrix = glm::mat4(1.0f);
-		glm::mat4 VMatrix = glm::mat4(1.0f);
-		glm::mat4 PMatrix = glm::mat4(1.0f);
-		glm::mat4 MVPMatrix = glm::mat4(1.0f);
+		static glm::mat4 VMatrix;
+		static glm::mat4 PMatrix;
+		glm::mat4 MVPMatrix = glm::mat4(1.0f);//nic nie robi
 };

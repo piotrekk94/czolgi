@@ -1,5 +1,8 @@
 #include "model.hpp"
 std::vector<Light> Model::light;
+glm::mat4 Model::VMatrix = glm::mat4(1.0f);
+glm::mat4 Model::PMatrix = glm::mat4(1.0f);
+float Model::ambient;
 int Model::draw()
 {
 
@@ -8,6 +11,10 @@ int Model::draw()
 	glUniformMatrix4fv(	shader->getUniformLocation("V"), 1, false, glm::value_ptr(VMatrix));
 	glUniformMatrix4fv(	shader->getUniformLocation("P"), 1, false, glm::value_ptr(PMatrix));
 	glUniform1i(shader->getUniformLocation("hasTexture"), hasTexture);
+	glUniform1f(shader->getUniformLocation("ambient"), ambient);
+	glUniform1f(shader->getUniformLocation("shinniness"), shinniness);
+	glUniform4f( shader->getUniformLocation("color"), color.r, color.g, color.b, color.a);
+	glUniform4f( shader->getUniformLocation("specularColor"), specularColor.r, specularColor.g, specularColor.b, specularColor.a);
 	//
 	glUniform1i(shader->getUniformLocation("lightNumber"), light.size());
 	for (unsigned int i = 0 ; i < light.size() ; i++)

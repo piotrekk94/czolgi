@@ -1,8 +1,11 @@
 #version 330 core
+out vec4 outputColor;
 in vec4 vertex2;
 in vec2 UV;
 in vec4 normals;
-out vec4 color;
+uniform vec4 color;
+uniform vec4 specularColor;
+uniform float shinniness;
 float ambient = 0.2;
 // 
 uniform int lightNumber;
@@ -23,7 +26,7 @@ uniform mat4 V;
 uniform mat4 P;
 uniform sampler2D myTexture;
 uniform int hasTexture;
-vec4 textureColor = vec4(1,1,0,0);
+vec4 textureColor = color;
 //functions
 float phong(vec4 toLight, vec4 toViewer, float power, float shinniness);
 vec3 simpleShading(vec3 material, vec3 light, float distance);
@@ -35,8 +38,8 @@ void main()
 {
 	/////////////////////////////
 	if (hasTexture == 1) textureColor = texture( myTexture, UV); 
-	color.rgb = calcLight();
-//	color.rgb = light[0].color * Il;
+	outputColor.rgb = calcLight();
+//	outputColor.rgb = light[0].color * Il;
 }
 vec3 calcLight()
 {
@@ -68,9 +71,9 @@ vec3 calcLight()
 		}
 		toViewer = normalize(vec4(0,0,0,1) - V * M * vertex2);
 		float Il = lambert(toLight, light[i].power);
-		float Ip = phong(toLight, toViewer, light[i].power, 100);
+		float Ip = phong(toLight, toViewer, light[i].power, shinniness);
 		color.rgb += simpleShading(textureColor.rgb, light[i].color * Il , d*d);
-		color.rgb += simpleShading(textureColor.rgb , light[i].color * Ip , d * d);
+		color.rgb += simpleShading(specularColor.rgb , light[i].color * Ip , d * d);
 	}
 	return color;
 
