@@ -7,30 +7,102 @@
 #include "shader.hpp"
 #include "model.hpp"
 
-bool turn = false;
-bool lightShift = false;
-float move_x, move_y;
-float FoV = 45.0;
-GLFWwindow *window;
-GLuint VertexArrayID;
-glm::mat4 mvp;
-
-int initGL(int x, int y);
+int mainLoop();
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void timeMeasure();
-float cameraPositionX = 0;
-float cameraPositionY = 0;
-double xposOld;
+
+int windowWidth = 1024;
+int windowHeight = 768;
+GLFWwindow *window;
+GLuint VertexArrayID;
+
+float cameraPositionX = 4.0f;
+float cameraPositionY = 3.0f;
+float cameraPositionZ = 3.0f;
+float FoV = 45.0; // Field of View
+double xposOld; // poprzednia pozycja kursora myszy
 double yposOld;
+
+bool rotate = false;
+bool lightShift = false;
+float move_x, move_y;
 
 int main(int argc, char **argv)
 {
-	initGL(1024, 768);
+	// Initialise GLFW
+	if(!glfwInit()) {
+		fprintf(stderr, "Failed to initialize GLFW\n");
+		getchar();
+		return -1;
+	}
+
+	glfwWindowHint(GLFW_SAMPLES, 4); //  specifies the desired number of samples to use for multisampling. Zero disables multisampling. GLFW_DONT_CARE means the application has no preference.
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // We want OpenGL 3.3
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // specifies whether the OpenGL context should be forward-compatible, i.e. one where all functionality deprecated in the requested version of OpenGL is removed. This must only be used if the requested OpenGL version is 3.0 or above.
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // GLFW_OPENGL_PROFILE specifies which OpenGL profile to create the context for. Possible values are one of GLFW_OPENGL_CORE_PROFILE or GLFW_OPENGL_COMPAT_PROFILE, or GLFW_OPENGL_ANY_PROFILE to not request a specific profile. If requesting an OpenGL version below 3.2, GLFW_OPENGL_ANY_PROFILE must be used.
+
+	// Open a window and create its OpenGL context
+	window = glfwCreateWindow(windowWidth, windowHeight, "Tanks", NULL, NULL);
+	if (window == NULL) {
+		fprintf( stderr, "Failed to open GLFW window.\n");
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
+
+	// Initialize GLEW
+	glewExperimental = true; // Needed in openGL core profile
+	if (glewInit() != GLEW_OK) {
+		fprintf(stderr, "Failed to initialize GLEW\n");
+		return -1;
+	}
+
+	// Ensure we can capture the escape key being pressed below
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+
+	// Keyborard tokens handling
+	glfwSetKeyCallback(window, key_callback);
+
+	// This will hide the cursor and lock it to the specified window
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	// Cursor position handling
+	glfwSetCursorPosCallback(window, cursor_pos_callback);
+	glfwGetCursorPos(window, &xposOld, &yposOld);
+	fprintf(stderr,"xposOld: %lf; yposOld: %lf\n", xposOld, yposOld);
+
+	// Mouse wheel handling
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// Background color
+	glClearColor(0.0f, 0.0f, 0.2f, 0.0f);
+
+	// z-bufor
+	glEnable(GL_DEPTH_TEST);
+
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS);
+
+	// Cull triangles which normal is not towards the camera
+	glEnable(GL_CULL_FACE);
 
 	glGenVertexArrays(1, &VertexArrayID);
 
+	mainLoop();
+
+	glDeleteVertexArrays(1, &VertexArrayID);
+
+	// Close OpenGL window and terminate GLFW
+	glfwTerminate();
+	return 0;
+}
+
+int mainLoop()
+{
+	glm::mat4 mvp;
 	ShaderProgram Shader("vertex.vert", "fragment.frag");
 	Shader.on();
 
@@ -58,7 +130,7 @@ int main(int argc, char **argv)
 	    		100.0f       // Far clipping plane. Keep as little as possible.
 		);
 		glm::mat4 ViewMatrix = glm::lookAt(
-			glm::vec3(cameraPositionX, cameraPositionY, 5.0f), // the position of your camera, in world space
+			glm::vec3(cameraPositionX, cameraPositionY, cameraPositionZ), // the position of your camera, in world space
 			glm::vec3(0.0f, 0.0f, 0.0f), // where you want to look at, in world space
 			glm::vec3(0.0f, 1.0f, 0.0f) // probably glm::vec3(0,1,0), but (0,-1,0) would make you looking upside-down, which can be great too
 		);
@@ -67,7 +139,7 @@ int main(int argc, char **argv)
 			ldx -= move_y * (glfwGetTime() - time);
 		}
 		else {
-			if (turn) {
+			if (rotate) {
 				angle_x += move_x * (glfwGetTime() - time);
 				angle_y += move_y * (glfwGetTime() - time);
 			} else {
@@ -115,74 +187,6 @@ int main(int argc, char **argv)
 	} // Check if the ESC key was pressed or the window was closed
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
 		glfwWindowShouldClose(window) == 0);
-
-	glDeleteVertexArrays(1, &VertexArrayID);
-
-	// Close OpenGL window and terminate GLFW
-	glfwTerminate();
-	return 0;
-}
-
-int initGL(int x, int y)
-{
-	// Initialise GLFW
-	if(!glfwInit()) {
-		fprintf(stderr, "Failed to initialize GLFW\n");
-		getchar();
-		return -1;
-	}
-
-	glfwWindowHint(GLFW_SAMPLES, 2); //  specifies the desired number of samples to use for multisampling. Zero disables multisampling. GLFW_DONT_CARE means the application has no preference.
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // We want OpenGL 3.3
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // specifies whether the OpenGL context should be forward-compatible, i.e. one where all functionality deprecated in the requested version of OpenGL is removed. This must only be used if the requested OpenGL version is 3.0 or above.
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // GLFW_OPENGL_PROFILE specifies which OpenGL profile to create the context for. Possible values are one of GLFW_OPENGL_CORE_PROFILE or GLFW_OPENGL_COMPAT_PROFILE, or GLFW_OPENGL_ANY_PROFILE to not request a specific profile. If requesting an OpenGL version below 3.2, GLFW_OPENGL_ANY_PROFILE must be used.
-
-	// Open a window and create its OpenGL context
-	window = glfwCreateWindow(x, y, "Tanks", NULL, NULL);
-	if (window == NULL) {
-		fprintf( stderr, "Failed to open GLFW window.\n");
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-
-	// Initialize GLEW
-	glewExperimental = true; // Needed in openGL core profile
-	if (glewInit() != GLEW_OK) {
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		return -1;
-	}
-
-	// Ensure we can capture the escape key being pressed below
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-
-	// Keyborard tokens handling
-	glfwSetKeyCallback(window, key_callback);
-
-	// This will hide the cursor and lock it to the specified window
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-	// Cursor position handling
-	glfwSetCursorPosCallback(window, cursor_pos_callback);
-	glfwGetCursorPos(window, &xposOld, &yposOld);
-
-	fprintf(stderr,"xposOld: %lf; yposOld: %lf\n", xposOld, yposOld);
-
-	// Mouse wheel handling
-	glfwSetScrollCallback(window, scroll_callback);
-
-	// Background color
-	glClearColor(0.0f, 0.0f, 0.2f, 0.0f);
-
-	// z-bufor
-	glEnable(GL_DEPTH_TEST);
-
-	// Accept fragment if it closer to the camera than the former one
-	glDepthFunc(GL_LESS);
-
-	// Cull triangles which normal is not towards the camera
-	glEnable(GL_CULL_FACE);
 	return 0;
 }
 
@@ -191,22 +195,22 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 	if (action == GLFW_PRESS) {
 		switch (key) {
 		case GLFW_KEY_LEFT_CONTROL:
-			turn = true;
+			rotate = true;
 			break;
 		case GLFW_KEY_LEFT_ALT:
 			lightShift = true;
 			break;
 		case GLFW_KEY_LEFT:
-			move_y = -3.14;
-			break;
-		case GLFW_KEY_RIGHT:
 			move_y = 3.14;
 			break;
+		case GLFW_KEY_RIGHT:
+			move_y = -3.14;
+			break;
 		case GLFW_KEY_UP:
-			move_x = -3.14;
+			move_x = 3.14;
 			break;
 		case GLFW_KEY_DOWN:
-			move_x = 3.14;
+			move_x = -3.14;
 			break;
 		}
 	}
@@ -214,7 +218,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 	if (action == GLFW_RELEASE) {
 		switch (key) {
 		case GLFW_KEY_LEFT_CONTROL:
-			turn = false;
+			rotate = false;
 			break;
 		case GLFW_KEY_LEFT_ALT:
 			lightShift = false;
@@ -228,13 +232,13 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 {
 	if (xposOld - xpos > 0) {
-		cameraPositionX += 0.1f;
+		cameraPositionX -= 0.09f;
 	} else if (xposOld - xpos < 0) {
-		cameraPositionX -= 0.1f;
+		cameraPositionX += 0.09f;
 	} else if (yposOld - ypos > 0) {
-		cameraPositionY += 0.1f;
+		cameraPositionY += 0.09f;
 	} else if (yposOld - ypos < 0) {
-		cameraPositionY -= 0.1f;
+		cameraPositionY -= 0.09f;
 	}
 	xposOld = xpos;
 	yposOld = ypos;
@@ -244,7 +248,7 @@ static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
 	if (yoffset == 1) {
-		FoV -= 0.1f;
+		FoV-= 0.1f;
 	} else if (yoffset == -1) {
 		FoV += 0.1f;
 	}
