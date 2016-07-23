@@ -106,9 +106,9 @@ int mainLoop()
 	ShaderProgram Shader("vertex.vert", "fragment.frag");
 	Shader.on();
 
-	Model cube("models/cube2.obj", &Shader, VertexArrayID);
-	Model cube3("models/cube2.obj", &Shader, VertexArrayID);
-	Model cube2("models/zero.obj", &Shader, VertexArrayID);
+	Model cube("models/cube2.obj", &Shader);
+	Model cube3("models/cube2.obj", &Shader);
+	Model cube2("models/zero.obj", &Shader);
 	cube.textureLoad("./tekstura.png");
 
 	glm::vec4 lightPosition = glm::vec4(0,0,0,1);
@@ -160,7 +160,6 @@ int mainLoop()
 		ModelMatrix = glm::rotate(ModelMatrix, angle_x, glm::vec3(1,0,0));
 		ModelMatrix = glm::rotate(ModelMatrix, angle_y, glm::vec3(0,1,0));
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		mvp = ProjectionMatrix * ViewMatrix * ModelMatrix;
 		cube.setMMatrix(glm::mat4(1.0f));// reset
 		//cube.scale(glm::vec3(0.5f, 0.5f, 0.1f));
 		cube.translate(glm::vec3(dx,dy,1));
@@ -168,23 +167,18 @@ int mainLoop()
 		cube.rotate(angle_y, glm::vec3(0,1,0));
 		cube.translate(glm::vec3(-0.5,-0.5,-0.5));
 
-		cube.setVMatrix(ViewMatrix);
-		cube.setPMatrix(ProjectionMatrix);
-		cube.setMVPMatrix(mvp);
+		cube.setVMatrix(ViewMatrix);//raz dla wszystkich instacji
+		cube.setPMatrix(ProjectionMatrix);//raz dla wszystkich instancji
 		cube.draw();
 
 		cube2.setMMatrix(glm::mat4(1));
 		cube2.translate(glm::vec3(0,0,0));
-		cube2.setVMatrix(ViewMatrix);
-		cube2.setPMatrix(ProjectionMatrix);
 		cube2.draw();
 
 		cube3.setMMatrix(glm::mat4(1));
 		cube.translate(glm::vec3(-0.5,-0.5,-0.5));
 		cube3.translate(glm::vec3(ldx,ldy,0));
 		cube3.scale(glm::vec3(0.1,0.1,0.1));
-		cube3.setVMatrix(ViewMatrix);
-		cube3.setPMatrix(ProjectionMatrix);
 		cube3.draw();
 
 		glfwSwapBuffers(window);

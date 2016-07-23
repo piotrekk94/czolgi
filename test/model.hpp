@@ -27,10 +27,10 @@ class Model
 {
 	public:
 		int draw();
-		Model(std::vector<GLfloat> &inVertex, ShaderProgram *shader, GLuint vertexArrayID);
-		Model(const char *fileName, ShaderProgram *shader, GLuint vertexArrayID, unsigned *whichMesh = nullptr);
+		Model(std::vector<GLfloat> &inVertex, ShaderProgram *shader); //stara metoda
+		Model(const char *fileName, ShaderProgram *shader, unsigned *whichMesh = nullptr);
+		//whichMesh zwraca ile siatek jest w pliku
 		~Model();
-		int setMVPMatrix(glm::mat4 MVPMatrix);
 		int setVMatrix(glm::mat4 MMatrix);
 		int setMMatrix(glm::mat4 MMatrix);
 		int setPMatrix(glm::mat4 MMatrix);
@@ -45,7 +45,9 @@ class Model
 		glm::vec4 color = glm::vec4(1,1,0,0);
 		glm::vec4 specularColor = glm::vec4(1,1,1,0);
 	private:
-		int enableLight();
+		int enableLight(); //na razie nie wykorzystywana
+		int sendUniformData();
+		int readOBJ(const char *fileName, unsigned *whichMesh = nullptr);
 		//std::vector<GLfloat> vertex;
 		int verticesAmount;
 		ShaderProgram *shader = nullptr;
@@ -62,5 +64,5 @@ class Model
 		glm::mat4 MMatrix = glm::mat4(1.0f);
 		static glm::mat4 VMatrix;
 		static glm::mat4 PMatrix;
-		glm::mat4 MVPMatrix = glm::mat4(1.0f);//nic nie robi
+		glm::mat4 MVPMatrix = glm::mat4(1.0f);
 };

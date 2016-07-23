@@ -1,21 +1,35 @@
 #include "model.hpp"
+//zmienne statyczne
 std::vector<Light> Model::light;
 glm::mat4 Model::VMatrix = glm::mat4(1.0f);
 glm::mat4 Model::PMatrix = glm::mat4(1.0f);
 float Model::ambient;
+//
 int Model::draw()
 {
 
 	shader->on();
+	sendUniformData();
+	glBindVertexArray(vertexArrayID);
+	glDrawArrays(GL_TRIANGLES, 0, verticesAmount );
+	//glDisableVertexAttribArray(0); //
+	glBindVertexArray(0);
+	return 0;
+}
+int Model::sendUniformData()
+{
+
+	MVPMatrix = PMatrix * VMatrix * MMatrix;
 	glUniformMatrix4fv(	shader->getUniformLocation("M"), 1, false, glm::value_ptr(MMatrix));
 	glUniformMatrix4fv(	shader->getUniformLocation("V"), 1, false, glm::value_ptr(VMatrix));
 	glUniformMatrix4fv(	shader->getUniformLocation("P"), 1, false, glm::value_ptr(PMatrix));
+	glUniformMatrix4fv(	shader->getUniformLocation("MVP"), 1, false, glm::value_ptr(MVPMatrix));
 	glUniform1i(shader->getUniformLocation("hasTexture"), hasTexture);
 	glUniform1f(shader->getUniformLocation("ambient"), ambient);
 	glUniform1f(shader->getUniformLocation("shinniness"), shinniness);
 	glUniform4f( shader->getUniformLocation("color"), color.r, color.g, color.b, color.a);
 	glUniform4f( shader->getUniformLocation("specularColor"), specularColor.r, specularColor.g, specularColor.b, specularColor.a);
-	//
+	//światło
 	glUniform1i(shader->getUniformLocation("lightNumber"), light.size());
 	for (unsigned int i = 0 ; i < light.size() ; i++)
 	{
@@ -28,17 +42,14 @@ int Model::draw()
 		
 	}
 	//
-	glBindVertexArray(vertexArrayID);
-	glDrawArrays(GL_TRIANGLES, 0, verticesAmount ); // Starting from vertex 0; 3 vertices total -> 1 triangle
-	//glDisableVertexAttribArray(0); // to usuwa
-	glBindVertexArray(0);
+
 	return 0;
 }
-Model::Model(std::vector<GLfloat> &inVertex, ShaderProgram * shader, GLuint vertexArrayID)
+Model::Model(std::vector<GLfloat> &inVertex, ShaderProgram * shader)
 {
 	this->shader = shader;
 	//this->vertex = inVertex;
-	glGenVertexArrays(1,&vertexArrayID); // ??? osobne dla każdego modelu czy nie?
+	glGenVertexArrays(1,&vertexArrayID); // ??? raczej osobne
 	this->vertexArrayID = vertexArrayID;
 	verticesAmount = inVertex.size() / 3;
 	//
@@ -51,7 +62,7 @@ Model::Model(std::vector<GLfloat> &inVertex, ShaderProgram * shader, GLuint vert
 	assignVBO("vertex", vertexbuffer, 3);
 	glBindVertexArray(0);
 }
-int Model::enableLight()
+int Model::enableLight() //nieużywane
 {
 	glUniformBlockBinding(shader->getID(), shader->getUniformBlockIndex("LightBlock"), 1);//???
 	glGenBuffers(1, &lightBuffer);
@@ -60,16 +71,28 @@ int Model::enableLight()
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, lightBuffer);
 	return 0;
 }
-Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID, unsigned *whichMesh)
+Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
+{
+	this->shader = shader;
+	glGenVertexArrays(1,&this->vertexArrayID); // ??? raczej osobne
+	if (whichMesh != nullptr)
+		*whichMesh = readOBJ(fileName);
+	else readOBJ(fileName);
+	//glGenVertexArrays(1,&vertexArrayID); // ??? osobne dla każdego modelu czy nie?
+	glBindVertexArray(this->vertexArrayID);
+	assignVBO("vertex", vertexbuffer, 3);
+	assignVBO("Normals", normalsBuffer, 3);
+	assignVBO("vertexTexture", textureBuffer, 2);
+	glBindVertexArray(0);
+//	enableLight();
+}
+int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 {
 	std::vector<GLfloat> vertices;
 	std::vector<GLfloat> texture;
 	std::vector<GLfloat> normals;
 	int totalVertices = 0;
 	Assimp::Importer importer;
-	this->shader = shader;
-	this->vertexArrayID = vertexArrayID;
-	glGenVertexArrays(1,&(this->vertexArrayID)); // ??? osobne dla każdego modelu czy nie?
 	const aiScene * scene = importer.ReadFile( fileName, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FixInfacingNormals);
 	if (!scene)
 	{
@@ -90,7 +113,7 @@ Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID
 			meshesAmount = i + 1;
 		}
 	}
-	for(; i < meshesAmount ; i++) //!!! wczytywanie wszytkich czesci na raz
+	for(; i < meshesAmount ; i++)
 	{
 		aiMesh * mesh = scene->mMeshes[i];
 		int iMeshFaces = mesh->mNumFaces;
@@ -133,7 +156,7 @@ Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID
 		}
 		totalVertices += mesh->mNumVertices;
 	}
-	//
+	// generowanie buforów i wpisanie tam wczytanych danych
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_STATIC_DRAW);
@@ -146,18 +169,11 @@ Model::Model(const char * fileName, ShaderProgram * shader, GLuint vertexArrayID
 	glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(normals[0]), &normals[0], GL_STATIC_DRAW);
 	//
-	//glGenVertexArrays(1,&vertexArrayID); // ??? osobne dla każdego modelu czy nie?
-	glBindVertexArray(this->vertexArrayID);
-	assignVBO("vertex", vertexbuffer, 3);
-	assignVBO("Normals", normalsBuffer, 3);
-	assignVBO("vertexTexture", textureBuffer, 2);
-	glBindVertexArray(0);
+
 	verticesAmount = totalVertices;
-	if (whichMesh != nullptr)
-		*whichMesh = scene -> mNumMeshes;
-	enableLight();
+	return scene->mNumMeshes;
 }
-Model::~Model()
+Model::~Model()// tu pewnie dużo brakuje
 {
 	glDeleteTextures(1,&texture);
 }
@@ -178,11 +194,6 @@ int Model::textureLoad(const char * fileName)
 		return 0;
 	}
 	return 1;
-}
-int Model::setMVPMatrix(glm::mat4 MVPMatrix)
-{
-	this->MVPMatrix = MVPMatrix;
-	return 0;
 }
 int Model::setMMatrix(glm::mat4 MMatrix)
 {
@@ -218,10 +229,10 @@ void Model::assignVBO(const char * name, GLuint buf, int points)
 	glEnableVertexAttribArray(location);
 	//glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(
-			location,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-			points,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
+			location,
+			points,				//rozmiar
+			GL_FLOAT,           //typ
+			GL_FALSE,           //znormalizowane?
 			0,                  // stride
 			(void*)0            // array buffer offset
 			);
