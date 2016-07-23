@@ -19,10 +19,13 @@ int Model::draw()
 int Model::sendUniformData()
 {
 
+	glm::mat4 ITMV; //inverse transpose MVMatrix
+	ITMV = glm::inverse(glm::transpose(VMatrix * MMatrix));
 	MVPMatrix = PMatrix * VMatrix * MMatrix;
 	glUniformMatrix4fv(	shader->getUniformLocation("M"), 1, false, glm::value_ptr(MMatrix));
 	glUniformMatrix4fv(	shader->getUniformLocation("V"), 1, false, glm::value_ptr(VMatrix));
 	glUniformMatrix4fv(	shader->getUniformLocation("P"), 1, false, glm::value_ptr(PMatrix));
+	glUniformMatrix4fv(	shader->getUniformLocation("ITMV"), 1, false, glm::value_ptr(ITMV));
 	glUniformMatrix4fv(	shader->getUniformLocation("MVP"), 1, false, glm::value_ptr(MVPMatrix));
 	glUniform1i(shader->getUniformLocation("hasTexture"), hasTexture);
 	glUniform1f(shader->getUniformLocation("ambient"), ambient);
