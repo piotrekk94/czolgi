@@ -13,7 +13,6 @@ uniform mat4 V;
 uniform mat4 P;
 uniform mat4 MVP;
 uniform mat4 ITMV;
-uniform vec4 lightPosition[5];
 
 void main()
 {
@@ -21,5 +20,4 @@ void main()
 	gl_Position = MVP * vertex2;
 	UV = vec2(vertexTexture.x, 1.0 - vertexTexture.y);
 	normals = ITMV* vec4(Normals , 0) ;
-	vec4 actualLightPosition = V * lightPosition[0];
 }

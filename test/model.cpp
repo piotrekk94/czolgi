@@ -3,7 +3,7 @@
 std::vector<Light> Model::light;
 glm::mat4 Model::VMatrix = glm::mat4(1.0f);
 glm::mat4 Model::PMatrix = glm::mat4(1.0f);
-float Model::ambient;
+float Model::ambient = 0;
 //
 int Model::draw()
 {
@@ -96,7 +96,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 	std::vector<GLfloat> normals;
 	int totalVertices = 0;
 	Assimp::Importer importer;
-	const aiScene * scene = importer.ReadFile( fileName, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FixInfacingNormals);
+	const aiScene * scene = importer.ReadFile( fileName, aiProcess_Triangulate/* | aiProcess_GenNormals | aiProcess_FixInfacingNormals*/);
 	if (!scene)
 	{
 		fprintf(stderr,"Błąd odczytu: %s\n", fileName);

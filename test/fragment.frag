@@ -6,7 +6,7 @@ in vec4 normals;
 uniform vec4 color;
 uniform vec4 specularColor;
 uniform float shinniness;
-float ambient = 0.2;
+uniform float ambient;
 // 
 uniform int lightNumber;
 struct Light
@@ -61,8 +61,8 @@ vec3 calcLight()
 				}
 			case 2:
 				{
-					d = 1;
-					toLight = V * light[i].position;
+					d = 0;
+					toLight = normalize(V * light[i].position);
 					break;
 				}
 			default:
@@ -71,20 +71,20 @@ vec3 calcLight()
 		}
 		toViewer = normalize(vec4(0,0,0,1) - V * M * vertex2);
 		float Il = lambert(toLight, light[i].power);
-		float Ip = phong(toLight, toViewer, light[i].power, shinniness);
-		color.rgb += simpleShading(textureColor.rgb, light[i].color * Il , d*d);
-		color.rgb += simpleShading(specularColor.rgb , light[i].color * Ip , d * d);
+		float Ip = phong(toLight, toViewer, Il, shinniness);
+		color.rgb += simpleShading(textureColor.rgb, light[i].color * Il , d);
+		color.rgb += simpleShading(specularColor.rgb , light[i].color * Ip , d);
 	}
-	return color;
+	return pow(color, vec3(1/2.2));//gamma correction
 
 }
 float phong(vec4 toLight, vec4 toViewer, float power, float shinniness)
 {
 	vec4 P = normalize(-toLight);//???
-	P = reflect(P, norm);
+	P = normalize(reflect(P, norm));
 	vec4 V = normalize(toViewer);
 	float I = pow(clamp(dot(P, V), 0.0f, 1.0f), shinniness);
-	return I * power;
+	return I ;
 
 }
 float lambert(vec4 toLight, float power)
@@ -95,5 +95,5 @@ float lambert(vec4 toLight, float power)
 }
 vec3 simpleShading(vec3 material, vec3 light, float distance)
 {
-	return material * light / distance;
+	return material * light / (1 + distance * distance);
 }
