@@ -34,10 +34,6 @@ class Model
 		void setAngle(float x, float y, float z);
 		void setScale(float x, float y, float z);
 		void setCenter(float x, float y, float z);
-		void setPos(glm::vec3 pos);
-		void setAngle(glm::vec3 angle);
-		void setScale(glm::vec3 scale);
-		void setCenter(glm::vec3 center);
 
 		int draw();
 

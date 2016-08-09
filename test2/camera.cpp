@@ -25,7 +25,7 @@ void Camera::setYaw(float yaw){
   updateVector();
 }
 void Camera::setPitch(float pitch){
-  this->yaw = yaw;
+  this->pitch = pitch;
   updateVector();
 }
 
@@ -36,26 +36,25 @@ void Camera::updateVector(){
       newFront.z = sin(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
       this->front = glm::normalize(newFront);
       this->right = glm::normalize(glm::cross(this->front, this->up));
-      this->up = glm::normalize(glm::cross(this->right, this->front));
+      //this->up = glm::normalize(glm::cross(this->right, this->front));
 }
 
-void Camera::move(cameraDirection direction){
+void Camera::move(cameraDirection direction, float deltaTime){
   switch (direction) {
-    case STOP:
-      return;
     case FORWARD:
-      this->pos += this->front;
+      this->pos += this->front * deltaTime;
       break;
     case BACKWARD:
-      this->pos -= this->front;
+      this->pos -= this->front * deltaTime;
       break;
     case LEFT:
-      this->pos -= this->right;
+      this->pos -= this->right * deltaTime;
       break;
     case RIGHT:
-      this->pos += this->right;
+      this->pos += this->right * deltaTime;
       break;
   }
+  this->pos.y = 0.0f;
 }
 
 void Camera::rotate(float dx, float dy){
