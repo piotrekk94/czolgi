@@ -58,6 +58,9 @@ void Camera::move(cameraDirection direction, float deltaTime){
 }
 
 void Camera::rotate(float dx, float dy){
+  float sensitivity = 0.05f;
+  dx *= sensitivity;
+  dy *= sensitivity;
   this->yaw += dx;
   this->pitch += dy;
   if (this->pitch > 89.0f){

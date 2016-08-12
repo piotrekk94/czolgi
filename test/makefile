@@ -9,3 +9,6 @@ $(OUT): $(OBJ)
 
 %.o : %.cpp
 	$(CCPP) -c $< -o $@ $(CPPFLAGS)
+
+clean :
+	rm -f $(OBJ) $(OUT)
