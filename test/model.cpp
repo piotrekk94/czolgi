@@ -4,10 +4,31 @@ std::vector<Light> Model::light;
 glm::mat4 Model::VMatrix = glm::mat4(1.0f);
 glm::mat4 Model::PMatrix = glm::mat4(1.0f);
 float Model::ambient = 0;
-//
+
+void Model::setPos(float x, float y, float z){
+	pos = glm::vec3(x, y, z);
+}
+void Model::setAngle(float x, float y, float z){
+	angle = glm::vec3(x, y, z);
+}
+void Model::setScale(float x, float y, float z){
+	sc = glm::vec3(x, y, z);
+}
+void Model::setCenter(float x, float y, float z){
+	center = glm::vec3(x, y, z);
+}
+
 int Model::draw()
 {
 
+	MMatrix = glm::mat4(1.0f);
+	translate(center);
+	scale(sc);
+	translate(pos);
+	rotate(angle.x, glm::vec3(1,0,0));
+	rotate(angle.y, glm::vec3(0,1,0));
+	rotate(angle.z, glm::vec3(0,0,1));
+	translate(-center);
 	shader->on();
 	sendUniformData();
 	glBindVertexArray(vertexArrayID);
@@ -42,28 +63,11 @@ int Model::sendUniformData()
 		glUniform3f( shader->getUniformLocation(oss.str() + "].color"), light[i].color.r, light[i].color.g, light[i].color.b);
 		glUniform1f( shader->getUniformLocation(oss.str() + "].power"), light[i].power);
 		glUniform1i( shader->getUniformLocation(oss.str() + "].type"), light[i].type);
-		
+
 	}
 	//
 
 	return 0;
-}
-Model::Model(std::vector<GLfloat> &inVertex, ShaderProgram * shader)
-{
-	this->shader = shader;
-	//this->vertex = inVertex;
-	glGenVertexArrays(1,&vertexArrayID); // ??? raczej osobne
-	this->vertexArrayID = vertexArrayID;
-	verticesAmount = inVertex.size() / 3;
-	//
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, verticesAmount * 3 * sizeof(inVertex[0]), &inVertex[0], GL_STATIC_DRAW);
-	
-	//
-	glBindVertexArray(this->vertexArrayID);
-	assignVBO("vertex", vertexbuffer, 3);
-	glBindVertexArray(0);
 }
 int Model::enableLight() //nieużywane
 {
@@ -87,6 +91,12 @@ Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 	assignVBO("Normals", normalsBuffer, 3);
 	assignVBO("vertexTexture", textureBuffer, 2);
 	glBindVertexArray(0);
+
+	pos = glm::vec3(0, 0, 0);
+	angle = glm::vec3(0, 0, 0);
+	sc = glm::vec3(1, 1, 1);
+	center = glm::vec3(0, 0, 0);
+
 //	enableLight();
 }
 int Model::readOBJ(const char *fileName, unsigned *whichMesh)
@@ -205,12 +215,12 @@ int Model::setMMatrix(glm::mat4 MMatrix)
 }
 int Model::setVMatrix(glm::mat4 VMatrix)
 {
-	this->VMatrix = VMatrix;
+	Model::VMatrix = VMatrix;
 	return 0;
 }
 int Model::setPMatrix(glm::mat4 PMatrix)
 {
-	this->PMatrix = PMatrix;
+	Model::PMatrix = PMatrix;
 	return 0;
 }
 void Model::translate(glm::vec3 vector)

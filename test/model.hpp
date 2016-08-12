@@ -26,32 +26,42 @@ struct Light
 class Model
 {
 	public:
+
+		static int setVMatrix(glm::mat4 MMatrix);
+		static int setPMatrix(glm::mat4 MMatrix);
+
+		void setPos(float x, float y, float z);
+		void setAngle(float x, float y, float z);
+		void setScale(float x, float y, float z);
+		void setCenter(float x, float y, float z);
+
 		int draw();
-		Model(std::vector<GLfloat> &inVertex, ShaderProgram *shader); //stara metoda
+
 		Model(const char *fileName, ShaderProgram *shader, unsigned *whichMesh = nullptr);
 		//whichMesh zwraca ile siatek jest w pliku
 		~Model();
-		int setVMatrix(glm::mat4 MMatrix);
 		int setMMatrix(glm::mat4 MMatrix);
-		int setPMatrix(glm::mat4 MMatrix);
+
 		int textureLoad(const char *fileName);
-		void resetMMatrix();
-		void rotate(float angle, glm::vec3 vector);
-		void translate(glm::vec3 vector);
-		void scale(glm::vec3 vector);
 		static std::vector<Light> light;
 		static float ambient;
 		float shinniness = 100;
 		glm::vec4 color = glm::vec4(1,1,0,0);
 		glm::vec4 specularColor = glm::vec4(1,1,1,0);
 	private:
+		glm::vec3 pos, angle, sc, center;
+
 		int enableLight(); //na razie nie wykorzystywana
 		int sendUniformData();
 		int readOBJ(const char *fileName, unsigned *whichMesh = nullptr);
+
+		void rotate(float angle, glm::vec3 vector);
+		void translate(glm::vec3 vector);
+		void scale(glm::vec3 vector);
+
 		//std::vector<GLfloat> vertex;
 		int verticesAmount;
 		ShaderProgram *shader = nullptr;
-		int angle_x, angle_y, angle_z; // nic nie robi
 		GLint hasTexture = 0;
 		GLint hasTextureCoords = 0;
 		void assignVBO(const char * name, GLuint buf, int points);

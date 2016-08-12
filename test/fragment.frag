@@ -34,6 +34,7 @@ vec3 simpleShading(vec3 material, vec3 light, float distance);
 float lambert(vec4 toLight, float power);
 vec3 calcLight();
 //
+vec3 gamma = vec3(1.0);
 vec4 norm = normalize(normals);
 void main()
 {
@@ -43,8 +44,8 @@ void main()
 
 		 textureColor = texture( myTexture, UV); 
 	 }
-		 textureColor.rgb = pow(textureColor.rgb, vec3(2.2));//gamma correction
-		 useSpecularColor.rgb = pow(specularColor.rgb, vec3(2.2));//gamma correction
+		 textureColor.rgb = pow(textureColor.rgb, gamma);//gamma correction
+		 useSpecularColor.rgb = pow(specularColor.rgb, gamma);//gamma correction
 	outputColor.rgb = calcLight();
 //	outputColor.rgb = light[0].color * Il;
 }
@@ -82,7 +83,7 @@ vec3 calcLight()
 		color.rgb += simpleShading(textureColor.rgb, light[i].color * Il , d);
 		color.rgb += simpleShading(useSpecularColor.rgb , light[i].color * Ip , d);
 	}
-	return pow(color, vec3(1/2.2));//gamma correction
+	return pow(color, 1/gamma);//gamma correction
 
 }
 float phong(vec4 toLight, vec4 toViewer, float power, float shinniness)
