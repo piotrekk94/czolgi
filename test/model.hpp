@@ -45,7 +45,7 @@ class Model
 		int textureLoad(const char *fileName);
 		static std::vector<Light> light;
 		static float ambient;
-		float shinniness = 100;
+		float shinniness = 1000;
 		glm::vec4 color = glm::vec4(1,1,0,0);
 		glm::vec4 specularColor = glm::vec4(1,1,1,0);
 	private:

@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 	glClearColor(0.0f, 0.0f, 0.2f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
+//	glEnable(GL_CULL_FACE);
 	glGenVertexArrays(1, &VertexArrayID);
 
 	mainLoop();
@@ -81,15 +81,16 @@ int mainLoop()
 	ShaderProgram Shader("vertex.vert", "fragment.frag");
 
 	models.push_back(Model("models/cube2.obj", &Shader));
-	models.push_back(Model("models/cube2.obj", &Shader));
+	models.push_back(Model("models/farmhouse.obj", &Shader));
 	models.push_back(Model("models/tygrysmaly.obj", &Shader));
 	models[0].setPos(2,0,0);
 	models[1].setPos(0,2,0);
+	models[1].setScale(0.02,0.02,0.02);
 	models[2].setPos(0,0,2);
 
 
 	//Model cube("models/cube2.obj", &Shader);
-	//Model cube3("models/cube2.obj", &Shader);
+	//Model cube3("models/farmhouse.obj", &Shader);
 	//Model cube2("models/zero.obj", &Shader);
 	//cube.textureLoad("./tekstura.png");
 
@@ -127,7 +128,7 @@ int mainLoop()
 		cube3.setCenter(0.5, 0.5, 0.5);
 		cube3.draw();*/
 
-		for (int i = 0; i < models.size(); i++){
+		for (unsigned i = 0; i < models.size(); i++){
 			models[i].draw();
 		}
 
