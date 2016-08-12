@@ -108,7 +108,7 @@ int mainLoop()
 
 	Model cube("models/cube2.obj", &Shader);
 	Model cube3("models/cube2.obj", &Shader);
-	Model cube2("models/zero.obj", &Shader);
+	Model cube2("models/tygrysmaly.obj", &Shader);
 	cube.textureLoad("./tekstura.png");
 
 	glm::vec4 lightPosition = glm::vec4(0,0,0,1);
