@@ -16,11 +16,14 @@ public:
   void move(Direction direction, float deltaTime);
   void draw();
   void updateCamera();
-  void updateVector();
+  void toggleFirstPerson();
 private:
+  bool firstPerson = false;
   ShaderProgram *shader;
-  glm::vec3 position, front;
+  glm::vec3 position, hullFront, turretFront;
   float hullRoatation, turretRotation;
   std::vector<Model> parts;
   Camera *camera;
+  void updateTurret();
+  void updateHull();
 };

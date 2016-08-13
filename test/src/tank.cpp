@@ -8,16 +8,17 @@ Tank::Tank(const char *fileName, ShaderProgram *shader, Camera *camera){
   }
   this->camera = camera;
   position = glm::vec3(0.0f, 0.0f, 0.0f);
-  front = glm::vec3(0.0f, 0.0f, 1.0f);
+  hullFront = glm::vec3(0.0f, 0.0f, 1.0f);
+  turretFront = glm::vec3(0.0f, 0.0f, 1.0f);
 }
 
 void Tank::move(Direction direction, float deltaTime){
   switch (direction) {
     case FORWARD:
-      position += front * deltaTime;
+      position += hullFront * deltaTime;
       break;
     case BACKWARD:
-      position -= front * deltaTime;
+      position -= hullFront * deltaTime;
       break;
     case LEFT:
       hullRoatation -= deltaTime * 1.0f;
@@ -26,11 +27,10 @@ void Tank::move(Direction direction, float deltaTime){
       hullRoatation += deltaTime * 1.0f;
       break;
   }
-  updateVector();
+  updateHull();
 }
 
 void Tank::draw(){
-  turretRotation = glm::radians(camera->getYaw());
   parts[KADLUB].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
   parts[GASIENICA0].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
   parts[GASIENICA1].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
@@ -43,13 +43,33 @@ void Tank::draw(){
 }
 
 void Tank::updateCamera(){
-  camera->setPos(position.x, position.y + 10*TANK_SCALE, position.z);
+  glm::vec3 camPos;
+  updateTurret();
+  if(firstPerson){
+    camPos = position; // kamera 1 os
+  }else{
+    camPos = position - 0.5f * turretFront; //kamera 3 os
+  }
+  camera->setPos(camPos.x, camPos.y + 10*TANK_SCALE, camPos.z);
 }
 
-void Tank::updateVector(){
+void Tank::toggleFirstPerson(){
+  firstPerson = !firstPerson;
+}
+
+void Tank::updateTurret(){
+  turretRotation = glm::radians(camera->getYaw());
+  glm::vec3 newFront;
+  newFront.x = cos(turretRotation);
+  newFront.y = 0;
+  newFront.z = sin(turretRotation);
+  turretFront = glm::normalize(newFront);
+}
+
+void Tank::updateHull(){
   glm::vec3 newFront;
   newFront.x = cos(hullRoatation);
   newFront.y = 0;
   newFront.z = sin(hullRoatation);
-  front = glm::normalize(newFront);
+  hullFront = glm::normalize(newFront);
 }

@@ -145,6 +145,10 @@ void handleKeys(Tank *tank){
 	if(keyState[GLFW_KEY_D] || keyState[GLFW_KEY_RIGHT]){
 		tank->move(RIGHT, deltaTime);
 	}
+	if(keyState[GLFW_KEY_V]){
+		tank->toggleFirstPerson();
+		keyState[GLFW_KEY_V] = false;
+	}
 }
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
