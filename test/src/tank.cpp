@@ -57,6 +57,12 @@ void Tank::toggleFirstPerson(){
   firstPerson = !firstPerson;
 }
 
+void Tank::textureLoad(const char * fileName){
+  for (unsigned i = 0; i < parts.size(); i++){
+    parts[i].textureLoad(fileName);
+  }
+}
+
 void Tank::updateTurret(){
   turretRotation = glm::radians(camera->getYaw());
   glm::vec3 newFront;

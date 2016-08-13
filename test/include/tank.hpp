@@ -17,6 +17,7 @@ public:
   void draw();
   void updateCamera();
   void toggleFirstPerson();
+  void textureLoad(const char * fileName);
 private:
   bool firstPerson = false;
   ShaderProgram *shader;
