@@ -97,10 +97,10 @@ int mainLoop()
 	//Model cube2("models/zero.obj", &Shader);
 	//cube.textureLoad("./tekstura.png");
 
-	glm::vec4 lightPosition = glm::vec4(0,0,0,1);
+	glm::vec4 lightPosition = glm::vec4(0,3,30,1);
 	Light light(lightPosition);
 	light.color = glm::vec3(1,1,1);
-	light.power = 7;
+	light.power = 1;
 	Model::light.push_back(light);
 	light.type = 2;
 	light.power = 0.5;
