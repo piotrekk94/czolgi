@@ -1,15 +1,19 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
-# File Created: 13.08.2016 11:50:06
+# File Created: 13.08.2016 18:33:50
 
-newmtl wire_008008136
-	Ns 32
-	d 1
-	Tr 0
-	Tf 1 1 1
+newmtl Material__0
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
 	illum 2
-	Ka 0.0314 0.0314 0.5333
-	Kd 0.0314 0.0314 0.5333
-	Ks 0.3500 0.3500 0.3500
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka /Users/piotr/Desktop/ambush pattern.png
+	map_Kd /Users/piotr/Desktop/ambush pattern.png
 
 newmtl wire_006135058
 	Ns 32
@@ -19,24 +23,4 @@ newmtl wire_006135058
 	illum 2
 	Ka 0.0235 0.5294 0.2275
 	Kd 0.0235 0.5294 0.2275
-	Ks 0.3500 0.3500 0.3500
-
-newmtl wire_135006006
-	Ns 32
-	d 1
-	Tr 0
-	Tf 1 1 1
-	illum 2
-	Ka 0.5294 0.0235 0.0235
-	Kd 0.5294 0.0235 0.0235
-	Ks 0.3500 0.3500 0.3500
-
-newmtl wire_141007058
-	Ns 32
-	d 1
-	Tr 0
-	Tf 1 1 1
-	illum 2
-	Ka 0.5529 0.0275 0.2275
-	Kd 0.5529 0.0275 0.2275
 	Ks 0.3500 0.3500 0.3500
