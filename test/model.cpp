@@ -120,8 +120,9 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 			i = *whichMesh;
 			meshesAmount = i + 1;
 		}
-		else fprintf(stderr,"nie ma siatki o takim numerze wczytuje 0: %s\n", fileName);
+		else
 		{
+		fprintf(stderr,"nie ma siatki o takim numerze wczytuje 0: %s\n", fileName);
 			i = 0;
 			meshesAmount = i + 1;
 		}

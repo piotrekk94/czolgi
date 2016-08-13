@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 	glClearColor(0.0f, 0.0f, 0.2f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-//	glEnable(GL_CULL_FACE);
+//	glEnable(GL_CULL_FACE);// na razie zakomentowane lufa czolgu to jedna plaszczyzna przez co trochę znika
 	glGenVertexArrays(1, &VertexArrayID);
 
 	mainLoop();
@@ -84,8 +84,11 @@ int mainLoop()
 	models.push_back(Model("models/farmhousev2.obj", &Shader));
 	models.push_back(Model("models/tygrysv2.obj", &Shader));
 	models[0].setPos(2,0,0);
-	models[1].setPos(0,2,0);
+	models[1].setPos(10,0,10);
+	models[1].setAngle(0,40,0);
 	models[1].setScale(0.02,0.02,0.02);
+	models[1].textureLoad("./tekstury/farmhouse.jpg");
+	models[2].textureLoad("./tekstury/tekstura.png");
 	models[2].setPos(0,0,30);
 	models[2].setScale(0.03,0.03,0.03);
 
@@ -100,7 +103,7 @@ int mainLoop()
 	light.power = 7;
 	Model::light.push_back(light);
 	light.type = 2;
-	light.power = 0.3;
+	light.power = 0.5;
 	light.position = glm::vec4(-1,-1,-1,0);
 	Model::light.push_back(light);
 	float angle_x = 0, angle_y = 0, dx = 0, dy = 0;
