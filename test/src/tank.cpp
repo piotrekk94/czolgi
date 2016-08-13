@@ -46,6 +46,5 @@ void Tank::updateVector(){
   newFront.x = cos(hullRoatation);
   newFront.y = 0;
   newFront.z = sin(hullRoatation);
-  printf("%f %f\n", newFront.x, newFront.z);
   front = glm::normalize(newFront);
 }
