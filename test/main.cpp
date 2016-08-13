@@ -84,17 +84,12 @@ int mainLoop()
 
 	models.push_back(Model("models/cube2.obj", &Shader));
 	models.push_back(Model("models/farmhousev2.obj", &Shader));
-	//models.push_back(Model("models/tygrysv2.obj", &Shader));
 	models[0].setPos(2,0,0);
 	models[1].setPos(x,y,z);
 	models[1].setAngle(0,40,0);
 	models[1].setScale(0.02,0.02,0.02);
 	models[1].textureLoad("./tekstury/farmhouse.jpg");
-	//models[2].textureLoad("./tekstury/tekstura.png");
-	//models[2].setPos(0,0,30);
-	//models[2].setScale(0.03,0.03,0.03);
 	Tank tank("models/tygrysv2.obj", &Shader, &camera);
-	//tank.textureLoad("./tekstury/ambush_patternv2.png");
 
 	glm::vec4 lightPosition = glm::vec4(0,3,30,1);
 	Light light(lightPosition);
