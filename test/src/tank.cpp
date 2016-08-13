@@ -10,6 +10,11 @@ Tank::Tank(const char *fileName, ShaderProgram *shader, Camera *camera){
   position = glm::vec3(0.0f, 0.0f, 0.0f);
   hullFront = glm::vec3(0.0f, 0.0f, 1.0f);
   turretFront = glm::vec3(0.0f, 0.0f, 1.0f);
+  parts[KADLUB].textureLoad("./tekstury/hull.png");
+  parts[WIEZA].textureLoad("./tekstury/hull.png");
+  parts[LUFA].textureLoad("./tekstury/hull.png");
+  parts[GASIENICA0].textureLoad("./tekstury/treads.png");
+  parts[GASIENICA1].textureLoad("./tekstury/treads.png");
 }
 
 void Tank::move(Direction direction, float deltaTime){
