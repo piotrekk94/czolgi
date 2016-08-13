@@ -67,6 +67,8 @@ class Model
 		void assignVBO(const char * name, GLuint buf, int points);
 		GLuint vertexbuffer;
 		GLuint textureBuffer;
+		int textureNumber = 0;
+		static int globalTextureNumber;
 		GLuint normalsBuffer;
 		GLuint lightBuffer;
 		GLuint texture;

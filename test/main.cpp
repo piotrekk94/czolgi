@@ -95,10 +95,10 @@ int mainLoop()
 	//models[2].setScale(0.03,0.03,0.03);
 	Tank tank("models/tygrysv2.obj", &Shader, &camera);
 
-	glm::vec4 lightPosition = glm::vec4(0,0,0,1);
+	glm::vec4 lightPosition = glm::vec4(0,3,30,1);
 	Light light(lightPosition);
 	light.color = glm::vec3(1,1,1);
-	light.power = 7;
+	light.power = 1;
 	Model::light.push_back(light);
 	light.type = 2;
 	light.power = 0.5;

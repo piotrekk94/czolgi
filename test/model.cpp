@@ -4,6 +4,7 @@ std::vector<Light> Model::light;
 glm::mat4 Model::VMatrix = glm::mat4(1.0f);
 glm::mat4 Model::PMatrix = glm::mat4(1.0f);
 float Model::ambient = 0;
+int Model::globalTextureNumber = 0;
 
 void Model::setPos(float x, float y, float z){
 	pos = glm::vec3(x, y, z);
@@ -31,6 +32,8 @@ int Model::draw()
 	scale(sc);
 	shader->on();
 	sendUniformData();
+	glActiveTexture(textureNumber);
+	glBindTexture(GL_TEXTURE_2D, texture);
 	glBindVertexArray(vertexArrayID);
 	glDrawArrays(GL_TRIANGLES, 0, verticesAmount );
 	//glDisableVertexAttribArray(0); //
@@ -49,6 +52,7 @@ int Model::sendUniformData()
 	glUniformMatrix4fv(	shader->getUniformLocation("ITMV"), 1, false, glm::value_ptr(ITMV));
 	glUniformMatrix4fv(	shader->getUniformLocation("MVP"), 1, false, glm::value_ptr(MVPMatrix));
 	glUniform1i(shader->getUniformLocation("hasTexture"), hasTexture);
+	glUniform1i(shader->getUniformLocation("myTexture"), textureNumber);
 	glUniform1f(shader->getUniformLocation("ambient"), ambient);
 	glUniform1f(shader->getUniformLocation("shinniness"), shinniness);
 	glUniform4f( shader->getUniformLocation("color"), color.r, color.g, color.b, color.a);
@@ -195,8 +199,11 @@ int Model::textureLoad(const char * fileName)
 {
 	if (hasTextureCoords)
 	{
+		textureNumber  = globalTextureNumber;
+		globalTextureNumber++;
 		int width, height, channels;
 		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
+		glActiveTexture(GL_TEXTURE0 + textureNumber);
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
