@@ -83,7 +83,7 @@ Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 	this->shader = shader;
 	glGenVertexArrays(1,&this->vertexArrayID); // ??? raczej osobne
 	if (whichMesh != nullptr)
-		*whichMesh = readOBJ(fileName);
+		*whichMesh = readOBJ(fileName, whichMesh);
 	else readOBJ(fileName);
 	//glGenVertexArrays(1,&vertexArrayID); // ??? osobne dla każdego modelu czy nie?
 	glBindVertexArray(this->vertexArrayID);
