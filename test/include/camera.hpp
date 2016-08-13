@@ -1,7 +1,7 @@
 #pragma once
 #include <glm/gtx/transform.hpp>
 
-enum cameraDirection {
+enum Direction {
   FORWARD,
   BACKWARD,
   LEFT,
@@ -20,7 +20,7 @@ public:
   void setYaw(float yaw);
   void setPitch(float pitch);
 
-  void move(cameraDirection direction, float deltaTime);
+  void move(Direction direction, float deltaTime);
   void rotate(float dx, float dy);
 private:
   glm::vec3 pos, front, up, right;

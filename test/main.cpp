@@ -7,13 +7,14 @@
 #include "shader.hpp"
 #include "model.hpp"
 #include "camera.hpp"
+#include "tank.hpp"
 
 int mainLoop();
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void fpsMeter();
-void handleKeys();
+void handleKeys(Tank *tank);
 
 int windowWidth = 1024;
 int windowHeight = 768;
@@ -78,24 +79,21 @@ int main(int argc, char **argv)
 
 int mainLoop()
 {
+	int x = 0,y = 0,z = 0;
 	ShaderProgram Shader("vertex.vert", "fragment.frag");
 
 	models.push_back(Model("models/cube2.obj", &Shader));
 	models.push_back(Model("models/farmhousev2.obj", &Shader));
-	models.push_back(Model("models/tygrysv2.obj", &Shader));
+	//models.push_back(Model("models/tygrysv2.obj", &Shader));
 	models[0].setPos(2,0,0);
-	models[1].setPos(10,0,10);
+	models[1].setPos(x,y,z);
 	models[1].setAngle(0,40,0);
 	models[1].setScale(0.02,0.02,0.02);
 	models[1].textureLoad("./tekstury/farmhouse.jpg");
-	models[2].textureLoad("./tekstury/tekstura.png");
-	models[2].setPos(0,0,30);
-	models[2].setScale(0.03,0.03,0.03);
-
-	//Model cube("models/cube2.obj", &Shader);
-	//Model cube3("models/farmhouse.obj", &Shader);
-	//Model cube2("models/zero.obj", &Shader);
-	//cube.textureLoad("./tekstura.png");
+	//models[2].textureLoad("./tekstury/tekstura.png");
+	//models[2].setPos(0,0,30);
+	//models[2].setScale(0.03,0.03,0.03);
+	Tank tank("models/tygrysv2.obj", &Shader, &camera);
 
 	glm::vec4 lightPosition = glm::vec4(0,0,0,1);
 	Light light(lightPosition);
@@ -112,52 +110,41 @@ int mainLoop()
 	Model::setPMatrix(ProjectionMatrix);
 	do{
 		double startTime = glfwGetTime();
-
+		tank.updateCamera();
 		Model::setVMatrix(camera.getVMatrix());
 
 		Model::light[0].position = glm::vec4(ldx,ldy,0,1);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		/*cube.setPos(dx,dy,1);
-		cube.setAngle(angle_x,angle_y,0.0f);
-		cube.setCenter(0.5, 0.5, 0.5);
-		cube.draw();
-
-		cube2.draw();
-
-		cube3.setPos(ldx,ldy,0);
-		cube3.setScale(0.1,0.1,0.1);
-		cube3.setCenter(0.5, 0.5, 0.5);
-		cube3.draw();*/
-
+		x+=0.1f;
+		models[1].setPos(x,y,z);
 		for (unsigned i = 0; i < models.size(); i++){
 			models[i].draw();
 		}
-
+		tank.draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		double endTime = glfwGetTime();
 		deltaTime = endTime - startTime;
 		fpsMeter();
-		handleKeys();
+		handleKeys(&tank);
 	}
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 	return 0;
 }
 
-void handleKeys(){
+void handleKeys(Tank *tank){
 	if(keyState[GLFW_KEY_W] || keyState[GLFW_KEY_UP]){
-		camera.move(FORWARD, deltaTime);
+		tank->move(FORWARD, deltaTime);
 	}
 	if(keyState[GLFW_KEY_S] || keyState[GLFW_KEY_DOWN]){
-		camera.move(BACKWARD, deltaTime);
+		tank->move(BACKWARD, deltaTime);
 	}
 	if(keyState[GLFW_KEY_A] || keyState[GLFW_KEY_LEFT]){
-		camera.move(LEFT, deltaTime);
+		tank->move(LEFT, deltaTime);
 	}
 	if(keyState[GLFW_KEY_D] || keyState[GLFW_KEY_RIGHT]){
-		camera.move(RIGHT, deltaTime);
+		tank->move(RIGHT, deltaTime);
 	}
 }
 
@@ -178,7 +165,7 @@ static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 	camera.rotate(xpos - xposOld, yposOld - ypos);
 	xposOld = xpos;
 	yposOld = ypos;
-	fprintf(stderr,"xpos: %lf; ypos: %lf\n", xpos, ypos);
+	//fprintf(stderr,"xpos: %lf; ypos: %lf\n", xpos, ypos);
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)

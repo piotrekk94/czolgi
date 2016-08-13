@@ -23,12 +23,12 @@ int Model::draw()
 
 	MMatrix = glm::mat4(1.0f);
 	translate(center);
-	scale(sc);
 	translate(pos);
-	rotate(angle.x, glm::vec3(1,0,0));
 	rotate(angle.y, glm::vec3(0,1,0));
 	rotate(angle.z, glm::vec3(0,0,1));
+	rotate(angle.x, glm::vec3(1,0,0));
 	translate(-center);
+	scale(sc);
 	shader->on();
 	sendUniformData();
 	glBindVertexArray(vertexArrayID);

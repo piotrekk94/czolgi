@@ -39,7 +39,7 @@ void Camera::updateVector(){
       //this->up = glm::normalize(glm::cross(this->right, this->front));
 }
 
-void Camera::move(cameraDirection direction, float deltaTime){
+void Camera::move(Direction direction, float deltaTime){
   switch (direction) {
     case FORWARD:
       this->pos += this->front * deltaTime;
