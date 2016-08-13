@@ -94,7 +94,7 @@ int mainLoop()
 	//models[2].setPos(0,0,30);
 	//models[2].setScale(0.03,0.03,0.03);
 	Tank tank("models/tygrysv2.obj", &Shader, &camera);
-	tank.textureLoad("./tekstury/tekstura.png");
+	tank.textureLoad("./tekstury/ambush_pattern.png");
 
 	glm::vec4 lightPosition = glm::vec4(0,3,30,1);
 	Light light(lightPosition);
