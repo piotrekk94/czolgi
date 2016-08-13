@@ -34,7 +34,7 @@ vec3 simpleShading(vec3 material, vec3 light, float distance);
 float lambert(vec4 toLight, float power);
 vec3 calcLight();
 //
-vec3 gamma = vec3(1.0);
+vec3 gamma = vec3(2.2);
 vec4 norm = normalize(normals);
 void main()
 {
