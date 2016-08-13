@@ -102,9 +102,8 @@ int mainLoop()
 	Model::light.push_back(light);
 	light.type = 2;
 	light.power = 0.5;
-	light.position = glm::vec4(-1,-1,-1,0);
+	light.position = glm::vec4(-1,5,-1,0);
 	Model::light.push_back(light);
-	float angle_x = 0, angle_y = 0, dx = 0, dy = 0;
 	float ldx = 0, ldy = 0;
 	glm::mat4 ProjectionMatrix = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 100.0f);
 	Model::setPMatrix(ProjectionMatrix);

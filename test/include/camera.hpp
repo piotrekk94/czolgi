@@ -20,6 +20,9 @@ public:
   void setYaw(float yaw);
   void setPitch(float pitch);
 
+  float getYaw();
+  float getPitch();
+
   void move(Direction direction, float deltaTime);
   void rotate(float dx, float dy);
 private:

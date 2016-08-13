@@ -29,6 +29,14 @@ void Camera::setPitch(float pitch){
   updateVector();
 }
 
+float Camera::getYaw(){
+  return yaw;
+}
+
+float Camera::getPitch(){
+  return pitch;
+}
+
 void Camera::updateVector(){
       glm::vec3 newFront;
       newFront.x = cos(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));

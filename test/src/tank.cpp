@@ -30,8 +30,13 @@ void Tank::move(Direction direction, float deltaTime){
 }
 
 void Tank::draw(){
+  turretRotation = glm::radians(camera->getYaw());
+  parts[KADLUB].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
+  parts[GASIENICA0].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
+  parts[GASIENICA1].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
+  parts[WIEZA].setAngle(0, glm::radians(90.0f) - turretRotation, 0);
+  parts[LUFA].setAngle(0, glm::radians(90.0f) - turretRotation, 0);
   for (unsigned i = 0; i < parts.size(); i++){
-    parts[i].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
     parts[i].setPos(position.x, position.y, position.z);
     parts[i].draw();
   }
