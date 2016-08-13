@@ -81,13 +81,13 @@ int mainLoop()
 	ShaderProgram Shader("vertex.vert", "fragment.frag");
 
 	models.push_back(Model("models/cube2.obj", &Shader));
-	models.push_back(Model("models/farmhouse.obj", &Shader));
+	models.push_back(Model("models/farmhousev2.obj", &Shader));
 	models.push_back(Model("models/tygrysv2.obj", &Shader));
 	models[0].setPos(2,0,0);
 	models[1].setPos(0,2,0);
 	models[1].setScale(0.02,0.02,0.02);
-	models[2].setPos(0,0,10);
-	models[2].setScale(0.1,0.1,0.1);
+	models[2].setPos(0,0,30);
+	models[2].setScale(0.03,0.03,0.03);
 
 	//Model cube("models/cube2.obj", &Shader);
 	//Model cube3("models/farmhouse.obj", &Shader);
