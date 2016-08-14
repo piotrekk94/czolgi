@@ -123,6 +123,7 @@ int mainLoop()
 		deltaTime = endTime - startTime;
 		fpsMeter();
 		handleKeys(&tank);
+		tank.move(deltaTime);
 	}
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 	return 0;
@@ -130,16 +131,16 @@ int mainLoop()
 
 void handleKeys(Tank *tank){
 	if(keyState[GLFW_KEY_W] || keyState[GLFW_KEY_UP]){
-		tank->move(FORWARD, deltaTime);
+		tank->handleKeys(FORWARD, deltaTime);
 	}
 	if(keyState[GLFW_KEY_S] || keyState[GLFW_KEY_DOWN]){
-		tank->move(BACKWARD, deltaTime);
+		tank->handleKeys(BACKWARD, deltaTime);
 	}
 	if(keyState[GLFW_KEY_A] || keyState[GLFW_KEY_LEFT]){
-		tank->move(LEFT, deltaTime);
+		tank->handleKeys(LEFT, deltaTime);
 	}
 	if(keyState[GLFW_KEY_D] || keyState[GLFW_KEY_RIGHT]){
-		tank->move(RIGHT, deltaTime);
+		tank->handleKeys(RIGHT, deltaTime);
 	}
 	if(keyState[GLFW_KEY_V]){
 		tank->toggleFirstPerson();
