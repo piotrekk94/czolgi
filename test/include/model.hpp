@@ -43,9 +43,10 @@ class Model
 		int setMMatrix(glm::mat4 MMatrix);
 
 		int textureLoad(const char *fileName);
+		int bumpTextureLoad(const char * fileName);
 		static std::vector<Light> light;
 		static float ambient;
-		float shinniness = 1000;
+		float shinniness = 10;
 		glm::vec4 color = glm::vec4(1,1,0,0);
 		glm::vec4 specularColor = glm::vec4(1,1,1,0);
 	private:
@@ -63,11 +64,14 @@ class Model
 		int verticesAmount;
 		ShaderProgram *shader = nullptr;
 		GLint hasTexture = 0;
+		GLint hasBump = 0;
 		GLint hasTextureCoords = 0;
 		void assignVBO(const char * name, GLuint buf, int points);
 		GLuint vertexbuffer;
 		GLuint textureBuffer;
+		GLuint bumpTexture;
 		int textureNumber = 0;
+		int bumpTextureNumber = 0;
 		static int globalTextureNumber;
 		GLuint normalsBuffer;
 		GLuint lightBuffer;

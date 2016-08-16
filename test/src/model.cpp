@@ -32,12 +32,31 @@ int Model::draw()
 	scale(sc);
 	shader->on();
 	sendUniformData();
-	glActiveTexture(textureNumber);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	if (hasTexture)
+	{
+		glActiveTexture(textureNumber);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, texture);
+	}
+	if (hasBump)
+	{
+		glActiveTexture(bumpTextureNumber);
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, bumpTexture);
+	}
 	glBindVertexArray(vertexArrayID);
 	glDrawArrays(GL_TRIANGLES, 0, verticesAmount );
 	//glDisableVertexAttribArray(0); //
 	glBindVertexArray(0);
+	//
+	glActiveTexture(textureNumber);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	//
+	glActiveTexture(bumpTextureNumber);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	//
 	return 0;
 }
 int Model::sendUniformData()
@@ -52,7 +71,9 @@ int Model::sendUniformData()
 	glUniformMatrix4fv(	shader->getUniformLocation("ITMV"), 1, false, glm::value_ptr(ITMV));
 	glUniformMatrix4fv(	shader->getUniformLocation("MVP"), 1, false, glm::value_ptr(MVPMatrix));
 	glUniform1i(shader->getUniformLocation("hasTexture"), hasTexture);
+	glUniform1i(shader->getUniformLocation("hasBump"), hasBump);
 	glUniform1i(shader->getUniformLocation("myTexture"), textureNumber);
+	glUniform1i(shader->getUniformLocation("myBumpTexture"), bumpTextureNumber);
 	glUniform1f(shader->getUniformLocation("ambient"), ambient);
 	glUniform1f(shader->getUniformLocation("shinniness"), shinniness);
 	glUniform4f( shader->getUniformLocation("color"), color.r, color.g, color.b, color.a);
@@ -101,7 +122,7 @@ Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 	sc = glm::vec3(1, 1, 1);
 	center = glm::vec3(0, 0, 0);
 
-//	enableLight();
+	//	enableLight();
 }
 int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 {
@@ -126,7 +147,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 		}
 		else
 		{
-		fprintf(stderr,"nie ma siatki o takim numerze wczytuje 0: %s\n", fileName);
+			fprintf(stderr,"nie ma siatki o takim numerze wczytuje 0: %s\n", fileName);
 			i = 0;
 			meshesAmount = i + 1;
 		}
@@ -193,6 +214,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 }
 Model::~Model()// tu pewnie dużo brakuje
 {
+	glActiveTexture(GL_TEXTURE0 + textureNumber);
 	glDeleteTextures(1,&texture);
 }
 int Model::textureLoad(const char * fileName)
@@ -212,6 +234,27 @@ int Model::textureLoad(const char * fileName)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		hasTexture = 1;
+		return 0;
+	}
+	return 1;
+}
+int Model::bumpTextureLoad(const char * fileName)
+{
+	if (hasTextureCoords)
+	{
+		textureNumber  = globalTextureNumber;
+		globalTextureNumber++;
+		int width, height, channels;
+		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
+		glActiveTexture(GL_TEXTURE0 + textureNumber);
+		glGenTextures(1, &bumpTexture);
+		glBindTexture(GL_TEXTURE_2D, bumpTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		// 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		//	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		hasBump = 1;
 		return 0;
 	}
 	return 1;

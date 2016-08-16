@@ -25,7 +25,9 @@ uniform mat4 M;
 uniform mat4 V;
 uniform mat4 P;
 uniform sampler2D myTexture;
+uniform sampler2D myBumpTexture;
 uniform int hasTexture;
+uniform int hasBump;
 vec4 textureColor = color;
 vec4 useSpecularColor;
 //functions
@@ -41,11 +43,15 @@ void main()
 	/////////////////////////////
 	if (hasTexture == 1)
 	 {
-
 		 textureColor = texture( myTexture, UV); 
 	 }
-		 textureColor.rgb = pow(textureColor.rgb, gamma);//gamma correction
-		 useSpecularColor.rgb = pow(specularColor.rgb, gamma);//gamma correction
+
+	if (hasBump == 1)
+	 {
+		vec4 norm = normalize(texture(myBumpTexture, UV) * 2.0 - 1.0);
+	 }
+	textureColor.rgb = pow(textureColor.rgb, gamma);//gamma correction
+	useSpecularColor.rgb = pow(specularColor.rgb, gamma);//gamma correction
 	outputColor.rgb = calcLight();
 //	outputColor.rgb = light[0].color * Il;
 }
@@ -91,8 +97,8 @@ float phong(vec4 toLight, vec4 toViewer, float power, float shinniness)
 	vec4 P = -normalize(toLight);//???
 	P = normalize( reflect(P, norm));
 	vec4 V = normalize(toViewer);
-	float I = pow(clamp(dot(P, V), 0.0f, 1.0f), shinniness);
-	return I * power;
+	float I = pow(clamp(dot(P, V) * power, 0.0f, 1.0f), shinniness);
+	return I;
 
 }
 float lambert(vec4 toLight, float power)
