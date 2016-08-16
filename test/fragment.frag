@@ -1,4 +1,5 @@
 #version 330 core
+in mat4 TBN;
 out vec4 outputColor;
 in vec4 vertex2;
 in vec2 UV;
@@ -49,7 +50,7 @@ void main()
 
 	if (hasBump == 1)
 	 {
-		vec4 norm = normalize(ITMV * texture(myBumpTexture, UV) * 2.0 - 1.0);
+		norm = normalize(vec4(texture(myBumpTexture, UV).rgb * 2.0 - 1.0,0));
 	 }
 	textureColor.rgb = pow(textureColor.rgb, gamma);//gamma correction
 	useSpecularColor.rgb = pow(specularColor.rgb, gamma);//gamma correction
@@ -62,16 +63,14 @@ vec3 calcLight()
 	vec4 toLight;
 	vec4 toViewer;
 	vec3 color = textureColor.rgb * ambient;
-	vec4 actualLightPosition;
 	for (int i = 0; i < lightNumber ; i++)
 	{
 		switch (light[i].type ) 
 		{
 			case 1:
 				{
-					actualLightPosition = V * light[i].position;
-					d = length(vertex2 - actualLightPosition);
-					toLight = normalize(V * light[i].position - V * M * vertex2);
+					d = length(V * (M * vertex2 - light[i].position));//optymalizacje potrzebne
+					toLight = normalize(V * (light[i].position - M * vertex2));
 					break;
 				}
 			case 2:
@@ -84,11 +83,16 @@ vec3 calcLight()
 				continue;
 				break;
 		}
-		toViewer = normalize(vec4(0,0,0,1) - V * M * vertex2);
+		toViewer = normalize((vec4(0,0,0,1) - V * M * vertex2));
+		if (hasBump == 1)
+		{
+			toLight = normalize(TBN * toLight);
+			toViewer = normalize(TBN * toViewer);
+		}
 		float Il = lambert(toLight, light[i].power);
 		float Ip = phong(toLight, toViewer, light[i].power, shinniness);
 		color.rgb += simpleShading(textureColor.rgb, light[i].color * Il , d);
-		color.rgb += simpleShading(useSpecularColor.rgb , light[i].color * Ip , d);
+		//		color.rgb += simpleShading(useSpecularColor.rgb , light[i].color * Ip , d);
 	}
 	return pow(color, 1/gamma);//gamma correction
 
@@ -106,7 +110,7 @@ float lambert(vec4 toLight, float power)
 {
 	vec4 L = normalize(toLight);
 	float I = dot(norm, L); //???
-	return clamp(I, 0.0f, 1.0f) * power;
+	return clamp(I * power, 0.0f, 1.0f);
 }
 vec3 simpleShading(vec3 material, vec3 light, float distance)
 {

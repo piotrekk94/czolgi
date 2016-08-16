@@ -115,6 +115,8 @@ Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 	assignVBO("vertex", vertexbuffer, 3);
 	assignVBO("Normals", normalsBuffer, 3);
 	assignVBO("vertexTexture", textureBuffer, 2);
+	assignVBO("bitangents", bitangentsBuffer, 3);
+	assignVBO("tangents", tangentsBuffer, 3);
 	glBindVertexArray(0);
 
 	pos = glm::vec3(0, 0, 0);
@@ -127,6 +129,8 @@ Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 {
 	std::vector<GLfloat> vertices;
+	std::vector<glm::vec3> tangents;//vec3 jest dobry mozna resztę zmienić
+	std::vector<glm::vec3> bitangents;
 	std::vector<GLfloat> texture;
 	std::vector<GLfloat> normals;
 	int totalVertices = 0;
@@ -179,7 +183,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 				{
 					aiVector3t<float> uv = mesh->mTextureCoords[0][face.mIndices[k]];
 					texture.push_back(uv[0]);
-					texture.push_back(uv[1]);
+					texture.push_back(1 - uv[1]); //odwrócić y
 				}
 			}
 			if (mesh->HasNormals())
@@ -192,6 +196,39 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 					normals.push_back(temp[2]);
 				}
 			}
+			if (mesh->HasNormals() && mesh->HasTextureCoords(0))
+			{
+				// obliczanie tangent i bitangent
+				unsigned c = vertices.size();
+				// v1 - v0
+				glm::vec3 deltaPos1 = glm::vec3( vertices[j*9+3] - vertices[j*9] ,vertices[j*9+4] - vertices[j*9+1] ,vertices[j*9+5] - vertices[j*9+2] ); 
+				// v2 - v0
+				glm::vec3 deltaPos2 = glm::vec3( vertices[j*9+6] - vertices[j*9] ,vertices[j*9+7] - vertices[j*9+1] ,vertices[j*9+8] - vertices[j*9+2] ); 
+				// uv1 - uv0
+				glm::vec2 deltaUV1= glm::vec2( vertices[j*6+2] - vertices[j*6] ,vertices[j*6+3] - vertices[j*6+1]); 
+				// uv2 - uv0
+				glm::vec2 deltaUV2 = glm::vec2( vertices[j*6+4] - vertices[j*6] ,vertices[j*6+5] - vertices[j*6+1]); 
+				float denominator = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+				glm::vec3 tangent = (deltaPos1 * deltaUV2.y   - deltaPos2 * deltaUV1.y)*denominator;
+				glm::vec3 bitangent = (deltaPos2 * deltaUV1.x   - deltaPos1 * deltaUV2.x)*denominator;
+				//robienie by tangent był prostopadły ???
+				glm::vec3 n = glm::vec3(normals[c-9], normals[c-8], normals[c-7]);
+				tangent = glm::normalize(tangent - n * glm::dot(n, tangent));
+				tangents.push_back(tangent);
+				n = glm::vec3(normals[c-6], normals[c-5], normals[c-4]);
+				tangent = glm::normalize(tangent - n * glm::dot(n, tangent));
+				tangents.push_back(tangent);
+				n = glm::vec3(normals[c-3], normals[c-2], normals[c-1]);
+				tangent = glm::normalize(tangent - n * glm::dot(n, tangent));
+				tangents.push_back(tangent);
+				//ładujemy do vectora
+				tangents.push_back(tangent);
+				tangents.push_back(tangent);
+				bitangents.push_back(bitangent);
+				bitangents.push_back(bitangent);
+				bitangents.push_back(bitangent);
+
+			}
 		}
 		totalVertices += mesh->mNumVertices;
 	}
@@ -203,6 +240,14 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 	glGenBuffers(1, &textureBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
 	glBufferData(GL_ARRAY_BUFFER, texture.size() * sizeof(texture[0]), &texture[0], GL_STATIC_DRAW);
+
+	glGenBuffers(1, &tangentsBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, tangentsBuffer);
+	glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(tangents[0]), &tangents[0], GL_STATIC_DRAW);
+
+	glGenBuffers(1, &bitangentsBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, bitangentsBuffer);
+	glBufferData(GL_ARRAY_BUFFER, bitangents.size() * sizeof(bitangents[0]), &bitangents[0], GL_STATIC_DRAW);
 
 	glGenBuffers(1, &normalsBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
@@ -242,11 +287,11 @@ int Model::bumpTextureLoad(const char * fileName)
 {
 	if (hasTextureCoords)
 	{
-		textureNumber  = globalTextureNumber;
+		bumpTextureNumber  = globalTextureNumber;
 		globalTextureNumber++;
 		int width, height, channels;
 		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
-		glActiveTexture(GL_TEXTURE0 + textureNumber);
+		glActiveTexture(GL_TEXTURE0 + bumpTextureNumber);
 		glGenTextures(1, &bumpTexture);
 		glBindTexture(GL_TEXTURE_2D, bumpTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);

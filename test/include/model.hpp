@@ -74,6 +74,8 @@ class Model
 		int bumpTextureNumber = 0;
 		static int globalTextureNumber;
 		GLuint normalsBuffer;
+		GLuint tangentsBuffer;
+		GLuint bitangentsBuffer;
 		GLuint lightBuffer;
 		GLuint texture;
 		GLuint vertexArrayID;
