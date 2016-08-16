@@ -8,11 +8,12 @@ SRC += $(wildcard src/*.cpp)
 OBJ = $(SRC:%.cpp=$(BUILD_DIR)/%.o)
 DEP = $(OBJ:%.o=%.d)
 OUT = czolgi
-$(OUT): $(BUILD_DIR)/$(OUT)
-
-$(BUILD_DIR)/$(OUT): $(OBJ)
+#$(OUT): $(BUILD_DIR)/$(OUT)
+#	mv $(BUILD_DIR)/czolgi ./
+#$(BUILD_DIR)/
+$(OUT): $(OBJ)
 	mkdir -p $(@D)
-	$(CCPP) $(CPPFLAGS) -o $(OUT) $(OBJ) $(LFLAGS)
+	$(CCPP) $(CPPFLAGS) -o $@ $(OBJ) $(LFLAGS)
 
 -include $(DEP)
 $(BUILD_DIR)/%.o : %.cpp
@@ -20,4 +21,7 @@ $(BUILD_DIR)/%.o : %.cpp
 	$(CCPP) -MMD -c $< -o $@ $(CPPFLAGS)
 
 clean :
-	rm -f $(OBJ) $(OUT)
+	rm -f $(OBJ) $(DEP) $(OUT)
+	# jeszcze zostaje drzewo katalogów
+	# dodatkowe pytania:
+	# http://stackoverflow.com/questions/2394609/makefile-header-dependencies
