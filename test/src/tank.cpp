@@ -19,6 +19,11 @@ Tank::Tank(const char *fileName, ShaderProgram *shader, Camera *camera){
   parts[LUFA].textureLoad("./tekstury/hull.png");
   parts[GASIENICA0].textureLoad("./tekstury/treads.png");
   parts[GASIENICA1].textureLoad("./tekstury/treads.png");
+  //paweł
+  parts[KADLUB].bumpTextureLoad("./tekstury/tankNormal.png");
+  parts[WIEZA].bumpTextureLoad("./tekstury/tankNormal.png");
+  parts[LUFA].bumpTextureLoad("./tekstury/tankNormal.png");
+  //
 }
 
 void Tank::handleKeys(Direction direction, float deltaTime){
