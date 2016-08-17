@@ -1,7 +1,7 @@
 #version 330 core
-in mat4 TBN;
+in mat4 TBN; //macierz przekształcająca z camera space na tangent space
 out vec4 outputColor;
-in vec4 vertex2;
+in vec4 vertex_camera;
 in vec2 UV;
 in vec4 normals;
 uniform vec4 color;
@@ -12,7 +12,7 @@ uniform float ambient;
 uniform int lightNumber;
 struct Light
 {
-vec4 position;
+vec4 position;//camera space
 vec3 color;
 float power;
 int type;
@@ -69,21 +69,21 @@ vec3 calcLight()
 		{
 			case 1:
 				{
-					d = length(V * (M * vertex2 - light[i].position));//optymalizacje potrzebne
-					toLight = normalize(V * (light[i].position - M * vertex2));
+					d = length((vertex_camera - light[i].position));//optymalizacje potrzebne
+					toLight = normalize(light[i].position - vertex_camera);
 					break;
 				}
 			case 2:
 				{
 					d = 0;
-					toLight = normalize(V * light[i].position);
+					toLight = normalize(light[i].position);
 					break;
 				}
 			default:
 				continue;
 				break;
 		}
-		toViewer = normalize((vec4(0,0,0,1) - V * M * vertex2));
+		toViewer = normalize((vec4(0,0,0,1) - vertex_camera));
 		if (hasBump == 1)
 		{
 			toLight = normalize(TBN * toLight);

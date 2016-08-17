@@ -2,6 +2,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <SOIL/SOIL.h>
+#include <ctime>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -9,7 +10,7 @@
 #include <assimp/vector3.h>
 
 #include "shader.hpp"
-
+#define DEBUG 1
 struct Light
 {
 	glm::vec4 position;

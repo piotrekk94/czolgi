@@ -82,9 +82,10 @@ int Model::sendUniformData()
 	glUniform1i(shader->getUniformLocation("lightNumber"), light.size());
 	for (unsigned int i = 0 ; i < light.size() ; i++)
 	{
+		glm::vec4 lightPosition_camera = VMatrix * light[i].position;
 		std::ostringstream oss;
 		oss << "light[" << i;
-		glUniform4f( shader->getUniformLocation(oss.str() + "].position"), light[i].position.x, light[i].position.y, light[i].position.z, light[i].position.w);
+		glUniform4f( shader->getUniformLocation(oss.str() + "].position"), lightPosition_camera.x, lightPosition_camera.y, lightPosition_camera.z, lightPosition_camera.w);
 		glUniform3f( shader->getUniformLocation(oss.str() + "].color"), light[i].color.r, light[i].color.g, light[i].color.b);
 		glUniform1f( shader->getUniformLocation(oss.str() + "].power"), light[i].power);
 		glUniform1i( shader->getUniformLocation(oss.str() + "].type"), light[i].type);
@@ -105,6 +106,10 @@ int Model::enableLight() //nieużywane
 }
 Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 {
+#if DEBUG == 1 
+	fprintf(stderr,"ładowanie modelu: %s\n", fileName);
+	clock_t begin = clock();
+#endif
 	this->shader = shader;
 	glGenVertexArrays(1,&this->vertexArrayID); // ??? raczej osobne
 	if (whichMesh != nullptr)
@@ -123,16 +128,21 @@ Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 	angle = glm::vec3(0, 0, 0);
 	sc = glm::vec3(1, 1, 1);
 	center = glm::vec3(0, 0, 0);
+#if DEBUG == 1 
+	clock_t end = clock();
+	double elapsed = (1000 * double(end - begin)/CLOCKS_PER_SEC);
+	fprintf(stderr,"czas: %f ms\n", elapsed);
+#endif
 
 	//	enableLight();
 }
 int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 {
-	std::vector<GLfloat> vertices;
+	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> tangents;//vec3 jest dobry mozna resztę zmienić
 	std::vector<glm::vec3> bitangents;
-	std::vector<GLfloat> texture;
-	std::vector<GLfloat> normals;
+	std::vector<glm::vec2> texture;
+	std::vector<glm::vec3> normals;
 	int totalVertices = 0;
 	Assimp::Importer importer;
 	const aiScene * scene = importer.ReadFile( fileName, aiProcess_Triangulate/* | aiProcess_GenNormals | aiProcess_FixInfacingNormals*/);
@@ -172,18 +182,14 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 			for(int k = 0 ; k < 3 ; k++)
 			{
 				aiVector3t<float> pos = mesh->mVertices[face.mIndices[k]];
-
-				vertices.push_back(pos[0]);
-				vertices.push_back(pos[1]);
-				vertices.push_back(pos[2]);
+				vertices.push_back(glm::vec3(pos.x,pos.y,pos.z));
 			}
 			if (mesh->HasTextureCoords(0))
 			{
 				for(int k = 0 ; k < 3 ; k++)
 				{
 					aiVector3t<float> uv = mesh->mTextureCoords[0][face.mIndices[k]];
-					texture.push_back(uv[0]);
-					texture.push_back(1 - uv[1]); //odwrócić y
+					texture.push_back(glm::vec2(uv.x,1 - uv.y));//odwrócić y
 				}
 			}
 			if (mesh->HasNormals())
@@ -191,9 +197,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 				for(int k = 0 ; k < 3 ; k++)
 				{
 					aiVector3t<float> temp = mesh->mNormals[face.mIndices[k]];
-					normals.push_back(temp[0]);
-					normals.push_back(temp[1]);
-					normals.push_back(temp[2]);
+					normals.push_back(glm::vec3(temp.x,temp.y,temp.z));
 				}
 			}
 			if (mesh->HasNormals() && mesh->HasTextureCoords(0))
@@ -201,29 +205,29 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 				// obliczanie tangent i bitangent
 				unsigned c = vertices.size();
 				// v1 - v0
-				glm::vec3 deltaPos1 = glm::vec3( vertices[j*9+3] - vertices[j*9] ,vertices[j*9+4] - vertices[j*9+1] ,vertices[j*9+5] - vertices[j*9+2] ); 
+				glm::vec3 deltaPos1 = vertices[c - 2] - vertices[c - 3];
 				// v2 - v0
-				glm::vec3 deltaPos2 = glm::vec3( vertices[j*9+6] - vertices[j*9] ,vertices[j*9+7] - vertices[j*9+1] ,vertices[j*9+8] - vertices[j*9+2] ); 
+				glm::vec3 deltaPos2 = vertices[c - 1] - vertices[c - 3];
 				// uv1 - uv0
-				glm::vec2 deltaUV1= glm::vec2( vertices[j*6+2] - vertices[j*6] ,vertices[j*6+3] - vertices[j*6+1]); 
+				glm::vec2 deltaUV1 = texture[c - 2] - texture[c - 3];
 				// uv2 - uv0
-				glm::vec2 deltaUV2 = glm::vec2( vertices[j*6+4] - vertices[j*6] ,vertices[j*6+5] - vertices[j*6+1]); 
+				glm::vec2 deltaUV2 = texture[c - 1] - texture[c - 3];
+				//
 				float denominator = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
 				glm::vec3 tangent = (deltaPos1 * deltaUV2.y   - deltaPos2 * deltaUV1.y)*denominator;
 				glm::vec3 bitangent = (deltaPos2 * deltaUV1.x   - deltaPos1 * deltaUV2.x)*denominator;
 				//robienie by tangent był prostopadły ???
-				glm::vec3 n = glm::vec3(normals[c-9], normals[c-8], normals[c-7]);
-				tangent = glm::normalize(tangent - n * glm::dot(n, tangent));
-				tangents.push_back(tangent);
-				n = glm::vec3(normals[c-6], normals[c-5], normals[c-4]);
-				tangent = glm::normalize(tangent - n * glm::dot(n, tangent));
-				tangents.push_back(tangent);
-				n = glm::vec3(normals[c-3], normals[c-2], normals[c-1]);
-				tangent = glm::normalize(tangent - n * glm::dot(n, tangent));
-				tangents.push_back(tangent);
+				glm::vec3 tangentTemp;
+				glm::vec3 n = normals[c - 3];
+				tangentTemp = glm::normalize(tangent - n * glm::dot(n, tangent));
+				tangents.push_back(tangentTemp);
+				n = normals[c - 2];
+				tangentTemp = glm::normalize(tangent - n * glm::dot(n, tangent));
+				tangents.push_back(tangentTemp);
+				n = normals[c - 1];
+				tangentTemp = glm::normalize(tangent - n * glm::dot(n, tangent));
+				tangents.push_back(tangentTemp);
 				//ładujemy do vectora
-				tangents.push_back(tangent);
-				tangents.push_back(tangent);
 				bitangents.push_back(bitangent);
 				bitangents.push_back(bitangent);
 				bitangents.push_back(bitangent);
@@ -264,27 +268,42 @@ Model::~Model()// tu pewnie dużo brakuje
 }
 int Model::textureLoad(const char * fileName)
 {
+	int success = 1;
+#if DEBUG == 1 
+	fprintf(stderr,"ładowanie tekstury: %s\n", fileName);
+	clock_t begin = clock();
+#endif
 	if (hasTextureCoords)
 	{
 		textureNumber  = globalTextureNumber;
 		globalTextureNumber++;
 		int width, height, channels;
-		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
+		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGBA);
 		glActiveTexture(GL_TEXTURE0 + textureNumber);
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 		// 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 		//	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		hasTexture = 1;
-		return 0;
+		success = 0;
 	}
-	return 1;
+#if DEBUG == 1 
+	clock_t end = clock();
+	double elapsed = (1000 * double(end - begin)/CLOCKS_PER_SEC);
+	fprintf(stderr,"czas: %f ms\n", elapsed);
+#endif
+	return success;
 }
 int Model::bumpTextureLoad(const char * fileName)
 {
+	int success = 1;
+#if DEBUG == 1 
+	fprintf(stderr,"ładowanie tekstury: %s\n", fileName);
+	clock_t begin = clock();
+#endif
 	if (hasTextureCoords)
 	{
 		bumpTextureNumber  = globalTextureNumber;
@@ -300,9 +319,14 @@ int Model::bumpTextureLoad(const char * fileName)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		hasBump = 1;
-		return 0;
+		success = 0;
 	}
-	return 1;
+#if DEBUG == 1 
+	clock_t end = clock();
+	double elapsed = (1000 * double(end - begin)/CLOCKS_PER_SEC);
+	fprintf(stderr,"czas: %f ms\n", elapsed);
+#endif
+	return success;
 }
 int Model::setMMatrix(glm::mat4 MMatrix)
 {
