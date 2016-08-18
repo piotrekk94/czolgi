@@ -34,29 +34,27 @@ int Model::draw()
 	sendUniformData();
 	if (hasTexture)
 	{
-		glActiveTexture(textureNumber);
+		for(unsigned i=0; i < texture.size() ; i++)
+		{
+		glActiveTexture(textureNumber[i]);
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, texture);
-	}
-	if (hasBump)
-	{
-		glActiveTexture(bumpTextureNumber);
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, bumpTexture);
+		glBindTexture(GL_TEXTURE_2D, texture[i]);
+		}
 	}
 	glBindVertexArray(vertexArrayID);
 	glDrawArrays(GL_TRIANGLES, 0, verticesAmount );
 	//glDisableVertexAttribArray(0); //
 	glBindVertexArray(0);
 	//
-	glActiveTexture(textureNumber);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	//
-	glActiveTexture(bumpTextureNumber);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	//
+	if (hasTexture)
+	{
+		for(unsigned i=0; i < texture.size() ; i++)
+		{
+			glActiveTexture(textureNumber[i]);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+	}
 	return 0;
 }
 int Model::sendUniformData()
@@ -71,9 +69,9 @@ int Model::sendUniformData()
 	glUniformMatrix4fv(	shader->getUniformLocation("ITMV"), 1, false, glm::value_ptr(ITMV));
 	glUniformMatrix4fv(	shader->getUniformLocation("MVP"), 1, false, glm::value_ptr(MVPMatrix));
 	glUniform1i(shader->getUniformLocation("hasTexture"), hasTexture);
+	if (hasTexture)
+		glUniform1iv(shader->getUniformLocation("textureArray"),textureNumber.size(), &textureNumber[0]);
 	glUniform1i(shader->getUniformLocation("hasBump"), hasBump);
-	glUniform1i(shader->getUniformLocation("myTexture"), textureNumber);
-	glUniform1i(shader->getUniformLocation("myBumpTexture"), bumpTextureNumber);
 	glUniform1f(shader->getUniformLocation("ambient"), ambient);
 	glUniform1f(shader->getUniformLocation("shinniness"), shinniness);
 	glUniform4f( shader->getUniformLocation("color"), color.r, color.g, color.b, color.a);
@@ -139,7 +137,7 @@ Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 {
 	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> tangents;//vec3 jest dobry mozna resztę zmienić
+	std::vector<glm::vec3> tangents;
 	std::vector<glm::vec3> bitangents;
 	std::vector<glm::vec2> texture;
 	std::vector<glm::vec3> normals;
@@ -263,70 +261,105 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 }
 Model::~Model()// tu pewnie dużo brakuje
 {
-	glActiveTexture(GL_TEXTURE0 + textureNumber);
-	glDeleteTextures(1,&texture);
+	for(unsigned i = 0; i < texture.size() ; i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + textureNumber[i]);
+		glDeleteTextures(1,&texture[i]);
+	}
 }
-int Model::textureLoad(const char * fileName)
+/*
+int Model::textureUse(unsigned location, int number)
 {
-	int success = 1;
+	if (location < globalTextureNumber)
+	{
+		return 1;
+	}
+	if ((number < 0) || (number >= texture.size())) //jeśli nie ma takiego numeru wczytaj jako nową
+	{
+		number = texture.size();
+		textureNumber.push_back(location);
+		texture.push_back(0);
+	}
+}
+*/
+int Model::textureLoad(const char * fileName, int mipmap, int number)
+{
+	int location = -1;
 #if DEBUG == 1 
 	fprintf(stderr,"ładowanie tekstury: %s\n", fileName);
 	clock_t begin = clock();
 #endif
+
+	if ((number < 0) || ((unsigned)number >= texture.size())) //jeśli nie ma takiego numeru wczytaj jako nową
+	{
+		number = texture.size();
+		textureNumber.push_back(globalTextureNumber);
+		texture.push_back(0);
+		globalTextureNumber++;
+	}
 	if (hasTextureCoords)
 	{
-		textureNumber  = globalTextureNumber;
-		globalTextureNumber++;
 		int width, height, channels;
-		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGBA);
-		glActiveTexture(GL_TEXTURE0 + textureNumber);
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-		// 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-		//	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		hasTexture = 1;
-		success = 0;
+		std::string fileNameStr(fileName);
+		size_t dot = fileNameStr.find_last_of(".");
+		std::string ext;
+		if (dot != std::string::npos)
+		{
+			ext = fileNameStr.substr(dot);
+		}
+		if (ext.compare(".dds") == 0)
+		{
+
+			fprintf(stderr,"ładowanie %s\n",ext.c_str());
+			unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels, SOIL_FLAG_DDS_LOAD_DIRECT);
+			glActiveTexture(GL_TEXTURE0 + textureNumber[number]);
+			glGenTextures(1, &(texture[number]));
+			glBindTexture(GL_TEXTURE_2D, texture[number]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		}
+		else
+		{
+			unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
+			glActiveTexture(GL_TEXTURE0 + textureNumber[number]);
+			glGenTextures(1, &(texture[number]));
+			glBindTexture(GL_TEXTURE_2D, texture[number]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		}
+		//	if (mipmap)
+		{
+			glGenerateMipmap(GL_TEXTURE_2D);
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+			GLfloat largestAnisotropy;
+			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &largestAnisotropy);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, largestAnisotropy);
+		}
+		/*	else
+			{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			}
+			*/	hasTexture = 1;
+		location = textureNumber[number];
 	}
 #if DEBUG == 1 
 	clock_t end = clock();
 	double elapsed = (1000 * double(end - begin)/CLOCKS_PER_SEC);
 	fprintf(stderr,"czas: %f ms\n", elapsed);
 #endif
-	return success;
+	return location;
 }
-int Model::bumpTextureLoad(const char * fileName)
+int Model::bumpTextureLoad(const char * fileName, int number)
 {
-	int success = 1;
-#if DEBUG == 1 
-	fprintf(stderr,"ładowanie tekstury: %s\n", fileName);
-	clock_t begin = clock();
-#endif
-	if (hasTextureCoords)
+	if ((number < 0) || ((unsigned)number >= texture.size())) //jeśli nie ma takiego numeru wczytaj jako nową
 	{
-		bumpTextureNumber  = globalTextureNumber;
-		globalTextureNumber++;
-		int width, height, channels;
-		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
-		glActiveTexture(GL_TEXTURE0 + bumpTextureNumber);
-		glGenTextures(1, &bumpTexture);
-		glBindTexture(GL_TEXTURE_2D, bumpTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-		// 	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-		//	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		hasBump = 1;
-		success = 0;
+		hasBump = texture.size();
 	}
-#if DEBUG == 1 
-	clock_t end = clock();
-	double elapsed = (1000 * double(end - begin)/CLOCKS_PER_SEC);
-	fprintf(stderr,"czas: %f ms\n", elapsed);
-#endif
-	return success;
+	else
+	{
+		hasBump = number;
+	}
+	return textureLoad(fileName);
 }
 int Model::setMMatrix(glm::mat4 MMatrix)
 {

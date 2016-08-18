@@ -26,10 +26,10 @@ uniform mat4 M;
 uniform mat4 V;
 uniform mat4 P;
 uniform mat4 ITMV;//odwrócona transponowana macierz V * M
-uniform sampler2D myTexture;
-uniform sampler2D myBumpTexture;
+uniform sampler2D textureArray[2];
 uniform int hasTexture;
 uniform int hasBump;
+const int hasBump2 = 1;
 vec4 textureColor = color;
 vec4 useSpecularColor;
 //functions
@@ -45,12 +45,12 @@ void main()
 	/////////////////////////////
 	if (hasTexture == 1)
 	 {
-		 textureColor = texture( myTexture, UV); 
+		 textureColor = texture( textureArray[0], UV); 
 	 }
 
 	if (hasBump == 1)
 	 {
-		norm = normalize(vec4(texture(myBumpTexture, UV).rgb * 2.0 - 1.0,0));
+		norm = normalize(vec4(texture(textureArray[1], UV).rgb * 2.0 - 1.0,0));
 	 }
 	textureColor.rgb = pow(textureColor.rgb, gamma);//gamma correction
 	useSpecularColor.rgb = pow(specularColor.rgb, gamma);//gamma correction

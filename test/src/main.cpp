@@ -89,7 +89,7 @@ int mainLoop()
 	models[1].setAngle(0,40,0);
 	models[1].setScale(0.02,0.02,0.02);
 	models[1].textureLoad("./tekstury/farmhouse.dds");
-	models[1].bumpTextureLoad("./tekstury/farmhouseBumpToUse.dds");
+	models[1].bumpTextureLoad("./tekstury/farmhouseBumpToUse.dds",1);
 	Tank tank("models/tygrysv2.obj", &Shader, &camera);
 
 	glm::vec4 lightPosition = glm::vec4(0,3,30,1);

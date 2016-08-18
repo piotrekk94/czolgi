@@ -43,8 +43,8 @@ class Model
 		~Model();
 		int setMMatrix(glm::mat4 MMatrix);
 
-		int textureLoad(const char *fileName);
-		int bumpTextureLoad(const char * fileName);
+		int textureLoad(const char *fileName, int mipmap = 0, int number = -1);
+		int bumpTextureLoad(const char * fileName, int number = -1);
 		static std::vector<Light> light;
 		static float ambient;
 		float shinniness = 10;
@@ -70,15 +70,13 @@ class Model
 		void assignVBO(const char * name, GLuint buf, int points);
 		GLuint vertexbuffer;
 		GLuint textureBuffer;
-		GLuint bumpTexture;
-		int textureNumber = 0;
-		int bumpTextureNumber = 0;
+		std::vector<int> textureNumber;
 		static int globalTextureNumber;
 		GLuint normalsBuffer;
 		GLuint tangentsBuffer;
 		GLuint bitangentsBuffer;
 		GLuint lightBuffer;
-		GLuint texture;
+		std::vector<GLuint> texture;
 		GLuint vertexArrayID;
 		glm::mat4 MMatrix = glm::mat4(1.0f);
 		static glm::mat4 VMatrix;

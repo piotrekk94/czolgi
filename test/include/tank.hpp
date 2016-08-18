@@ -29,7 +29,7 @@ private:
   ShaderProgram *shader;
   glm::vec3 position, hullFront, turretFront;
   float hullRoatation, turretRotation, gunRotation;
-  float speed;
+  float speed = 0;
   std::vector<Model> parts;
   Camera *camera;
   void updateTurret();

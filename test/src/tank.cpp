@@ -14,9 +14,9 @@ Tank::Tank(const char *fileName, ShaderProgram *shader, Camera *camera){
 
   hullRoatation = turretRotation = gunRotation = 0;
 
-  parts[KADLUB].textureLoad("./tekstury/hull.png");
-  parts[WIEZA].textureLoad("./tekstury/hull.png");
-  parts[LUFA].textureLoad("./tekstury/hull.png");
+  parts[KADLUB].textureLoad("./tekstury/hull.dds");
+  parts[WIEZA].textureLoad("./tekstury/hull.dds");
+  parts[LUFA].textureLoad("./tekstury/hull.dds");
   parts[GASIENICA0].textureLoad("./tekstury/treads.png");
   parts[GASIENICA1].textureLoad("./tekstury/treads.png");
   //paweł
@@ -24,9 +24,9 @@ Tank::Tank(const char *fileName, ShaderProgram *shader, Camera *camera){
   //parts[WIEZA].bumpTextureLoad("./tekstury/tankNormal.png");
   //parts[LUFA].bumpTextureLoad("./tekstury/tankNormal.png");
   //
-  parts[KADLUB].bumpTextureLoad("./tekstury/tankBump.png");
-  parts[WIEZA].bumpTextureLoad("./tekstury/tankBump.png");
-  parts[LUFA].bumpTextureLoad("./tekstury/tankBump.png");
+  parts[KADLUB].bumpTextureLoad("./tekstury/tankBump.dds", 1);
+  parts[WIEZA].bumpTextureLoad("./tekstury/tankBump.dds", 1);
+  parts[LUFA].bumpTextureLoad("./tekstury/tankBump.dds", 1);
 }
 
 void Tank::handleKeys(Direction direction, float deltaTime){
@@ -52,6 +52,7 @@ void Tank::handleKeys(Direction direction, float deltaTime){
 }
 
 void Tank::move(float deltaTime){
+	//fprintf(stderr,"speed: %f", speed);
   if (accelerated){
     accelerated = false;
   } else {
