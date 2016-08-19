@@ -27,13 +27,11 @@ std::vector<Model> models;
 
 bool keyState[1024]; //True - wcisniety
 
-float FoV = 45.0;
-
 double deltaTime = 0;
 
 int main(int argc, char **argv)
 {
-	if(!glfwInit()) {
+	if (!glfwInit()) {
 		fprintf(stderr, "Failed to initialize GLFW\n");
 		getchar();
 		return -1;
@@ -45,9 +43,9 @@ int main(int argc, char **argv)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(windowWidth, windowHeight, "Tanks", NULL, NULL);
+	window = glfwCreateWindow(windowWidth, windowHeight, "Czolgi", NULL, NULL);
 	if (window == NULL) {
-		fprintf( stderr, "Failed to open GLFW window.\n");
+		fprintf(stderr, "Failed to open GLFW window.\n");
 		glfwTerminate();
 		return -1;
 	}
@@ -63,7 +61,6 @@ int main(int argc, char **argv)
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
-	glfwSetScrollCallback(window, scroll_callback);
 	glClearColor(0.0f, 0.0f, 0.2f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -79,7 +76,7 @@ int main(int argc, char **argv)
 
 int mainLoop()
 {
-	int x = 0,y = 0,z = 0;
+	int x = 0, y = 0, z = 0;
 	ShaderProgram Shader("vertex.vert", "fragment.frag");
 
 	models.push_back(Model("models/cube2.obj", &Shader));
@@ -102,7 +99,7 @@ int mainLoop()
 	light.position = glm::vec4(0,5,5,0);
 	Model::light.push_back(light);
 	float ldx = 0, ldy = 0;
-	glm::mat4 ProjectionMatrix = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 100.0f);
+	glm::mat4 ProjectionMatrix = glm::perspective(45.0f, float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
 	Model::setPMatrix(ProjectionMatrix);
 	do{
 		double startTime = glfwGetTime();
@@ -114,7 +111,7 @@ int mainLoop()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		x+=0.1f;
 		models[1].setPos(x,y,z);
-		for (unsigned i = 0; i < models.size(); i++){
+		for (unsigned i = 0; i < models.size(); i++) {
 			models[i].draw();
 		}
 		tank.draw();
@@ -130,20 +127,21 @@ int mainLoop()
 	return 0;
 }
 
-void handleKeys(Tank *tank){
-	if(keyState[GLFW_KEY_W] || keyState[GLFW_KEY_UP]){
+void handleKeys(Tank *tank)
+{
+	if (keyState[GLFW_KEY_W] || keyState[GLFW_KEY_UP]) {
 		tank->handleKeys(FORWARD, deltaTime);
 	}
-	if(keyState[GLFW_KEY_S] || keyState[GLFW_KEY_DOWN]){
+	if (keyState[GLFW_KEY_S] || keyState[GLFW_KEY_DOWN]) {
 		tank->handleKeys(BACKWARD, deltaTime);
 	}
-	if(keyState[GLFW_KEY_A] || keyState[GLFW_KEY_LEFT]){
+	if (keyState[GLFW_KEY_A] || keyState[GLFW_KEY_LEFT]) {
 		tank->handleKeys(LEFT, deltaTime);
 	}
-	if(keyState[GLFW_KEY_D] || keyState[GLFW_KEY_RIGHT]){
+	if (keyState[GLFW_KEY_D] || keyState[GLFW_KEY_RIGHT]) {
 		tank->handleKeys(RIGHT, deltaTime);
 	}
-	if(keyState[GLFW_KEY_V]){
+	if (keyState[GLFW_KEY_V]) {
 		tank->toggleFirstPerson();
 		keyState[GLFW_KEY_V] = false;
 	}
@@ -151,10 +149,10 @@ void handleKeys(Tank *tank){
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-	if (key >= 0 && key <= 1024){
-		if (action == GLFW_PRESS){
+	if (key >= 0 && key <= 1024) {
+		if (action == GLFW_PRESS) {
 			keyState[key] = true;
-		} else if (action == GLFW_RELEASE){
+		} else if (action == GLFW_RELEASE) {
 			keyState[key] = false;
 		}
 	}
@@ -169,19 +167,15 @@ static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 	//fprintf(stderr,"xpos: %lf; ypos: %lf\n", xpos, ypos);
 }
 
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+void fpsMeter()
 {
-
-}
-
-void fpsMeter(){
 	static int fps = 0;
 	static double lastTime = glfwGetTime();
 	double currentTime = glfwGetTime();
 	fps++;
-	if (currentTime - lastTime >= 1.0){
+	if (currentTime - lastTime >= 1.0) {
 		char title[10];
-		sprintf(title,"%f ms", 1000.0/fps);
+		sprintf(title,"%f ms", 1000.0/double(fps));
 		glfwSetWindowTitle(window, title);
 		fps = 0;
 		lastTime = currentTime;

@@ -105,7 +105,7 @@ int Model::enableLight() //nieużywane
 Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 {
 #if DEBUG == 1 
-	fprintf(stderr,"ładowanie modelu: %s\n", fileName);
+	fprintf(stderr,"ladowanie modelu: %s\n", fileName);
 	clock_t begin = clock();
 #endif
 	this->shader = shader;
@@ -146,7 +146,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 	const aiScene * scene = importer.ReadFile( fileName, aiProcess_Triangulate/* | aiProcess_GenNormals | aiProcess_FixInfacingNormals*/);
 	if (!scene)
 	{
-		fprintf(stderr,"Błąd odczytu: %s\n", fileName);
+		fprintf(stderr,"Blad odczytu: %s\n", fileName);
 	}
 	unsigned int meshesAmount = scene -> mNumMeshes;
 	unsigned i = 0;
@@ -171,7 +171,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 		if (mesh->HasTextureCoords(0))
 			hasTextureCoords = 1;
 		else
-			fprintf(stderr,"plik nie współrzędnych teksturowania: %s\n", fileName);
+			fprintf(stderr,"plik nie wspolrzednych teksturowania: %s\n", fileName);
 		if (!mesh->HasNormals())
 			fprintf(stderr,"plik nie ma normalnych: %s\n", fileName);
 		for ( int j = 0 ; j < iMeshFaces ; j++)
@@ -286,7 +286,7 @@ int Model::textureLoad(const char * fileName, int mipmap, int number)
 {
 	int location = -1;
 #if DEBUG == 1 
-	fprintf(stderr,"ładowanie tekstury: %s\n", fileName);
+	fprintf(stderr,"ladowanie tekstury: %s\n", fileName);
 	clock_t begin = clock();
 #endif
 
@@ -310,7 +310,7 @@ int Model::textureLoad(const char * fileName, int mipmap, int number)
 		if (ext.compare(".dds") == 0)
 		{
 
-			fprintf(stderr,"ładowanie %s\n",ext.c_str());
+			fprintf(stderr,"ladowanie %s\n",ext.c_str());
 			unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels, SOIL_FLAG_DDS_LOAD_DIRECT);
 			glActiveTexture(GL_TEXTURE0 + textureNumber[number]);
 			glGenTextures(1, &(texture[number]));
