@@ -27,7 +27,6 @@ struct Light
 class Model
 {
 	public:
-
 		static int setVMatrix(glm::mat4 MMatrix);
 		static int setPMatrix(glm::mat4 MMatrix);
 
@@ -44,7 +43,7 @@ class Model
 		int setMMatrix(glm::mat4 MMatrix);
 
 		int textureLoad(const char *fileName, int mipmap = 0, int number = -1);
-		int bumpTextureLoad(const char * fileName, int number = -1);
+		int bumpTextureLoad(const char *fileName, int number = -1);
 		static std::vector<Light> light;
 		static float ambient;
 		float shinniness = 10;

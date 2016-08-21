@@ -1,6 +1,8 @@
+#pragma once
 #include "model.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
+
 #define KADLUB 0
 #define GASIENICA0 1
 #define GASIENICA1 2
@@ -23,13 +25,13 @@ public:
   void updateCamera();
   void toggleFirstPerson();
   void textureLoad(const char * fileName);
+  float speed = 0;
 private:
   bool firstPerson = false;
   bool accelerated = false;
   ShaderProgram *shader;
   glm::vec3 position, hullFront, turretFront;
   float hullRoatation, turretRotation, gunRotation;
-  float speed = 0;
   std::vector<Model> parts;
   Camera *camera;
   void updateTurret();

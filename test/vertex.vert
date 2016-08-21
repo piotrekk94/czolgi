@@ -30,7 +30,6 @@ void main()
 	UV = vec2(vertexTexture.x, vertexTexture.y);
 	if (hasBump == 0)
 	{
-	normals = ITMV* vec4(Normals , 0);
+		normals = ITMV* vec4(Normals , 0);
 	}
-
 }

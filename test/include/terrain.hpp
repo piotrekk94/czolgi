@@ -5,7 +5,9 @@
 #include <SOIL/SOIL.h>
 #include <ctime>
 #include "shader.hpp"
+
 #define DEBUG 1
+
 class Terrain
 {
 	public:

@@ -8,6 +8,7 @@
 #include "model.hpp"
 #include "camera.hpp"
 #include "tank.hpp"
+#include "particles.hpp"
 
 int mainLoop();
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -43,6 +44,7 @@ int main(int argc, char **argv)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+
 	window = glfwCreateWindow(windowWidth, windowHeight, "Czolgi", NULL, NULL);
 	if (window == NULL) {
 		fprintf(stderr, "Failed to open GLFW window.\n");
@@ -64,7 +66,7 @@ int main(int argc, char **argv)
 	glClearColor(0.0f, 0.0f, 0.2f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-//	glEnable(GL_CULL_FACE);// na razie zakomentowane lufa czolgu to jedna plaszczyzna przez co trochę znika
+	glEnable(GL_CULL_FACE);
 	glGenVertexArrays(1, &VertexArrayID);
 
 	mainLoop();
@@ -109,7 +111,7 @@ int mainLoop()
 		Model::light[0].position = glm::vec4(ldx,ldy,0,1);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		x+=0.1f;
+		x += 0.1f;
 		models[1].setPos(x,y,z);
 		for (unsigned i = 0; i < models.size(); i++) {
 			models[i].draw();

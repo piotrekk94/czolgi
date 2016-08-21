@@ -34,21 +34,21 @@ int Model::draw()
 	sendUniformData();
 	if (hasTexture)
 	{
-		for(unsigned i=0; i < texture.size() ; i++)
+		for (unsigned i=0; i < texture.size() ; i++)
 		{
-		glActiveTexture(textureNumber[i]);
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, texture[i]);
+			glActiveTexture(textureNumber[i]);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, texture[i]);
 		}
 	}
 	glBindVertexArray(vertexArrayID);
 	glDrawArrays(GL_TRIANGLES, 0, verticesAmount );
-	//glDisableVertexAttribArray(0); //
+	//glDisableVertexAttribArray(0);
 	glBindVertexArray(0);
 	//
 	if (hasTexture)
 	{
-		for(unsigned i=0; i < texture.size() ; i++)
+		for (unsigned i=0; i < texture.size() ; i++)
 		{
 			glActiveTexture(textureNumber[i]);
 			glEnable(GL_TEXTURE_2D);
@@ -63,11 +63,11 @@ int Model::sendUniformData()
 	glm::mat4 ITMV; //inverse transpose MVMatrix
 	ITMV = glm::inverse(glm::transpose(VMatrix * MMatrix));
 	MVPMatrix = PMatrix * VMatrix * MMatrix;
-	glUniformMatrix4fv(	shader->getUniformLocation("M"), 1, false, glm::value_ptr(MMatrix));
-	glUniformMatrix4fv(	shader->getUniformLocation("V"), 1, false, glm::value_ptr(VMatrix));
-	glUniformMatrix4fv(	shader->getUniformLocation("P"), 1, false, glm::value_ptr(PMatrix));
-	glUniformMatrix4fv(	shader->getUniformLocation("ITMV"), 1, false, glm::value_ptr(ITMV));
-	glUniformMatrix4fv(	shader->getUniformLocation("MVP"), 1, false, glm::value_ptr(MVPMatrix));
+	glUniformMatrix4fv(shader->getUniformLocation("M"), 1, false, glm::value_ptr(MMatrix));
+	glUniformMatrix4fv(shader->getUniformLocation("V"), 1, false, glm::value_ptr(VMatrix));
+	glUniformMatrix4fv(shader->getUniformLocation("P"), 1, false, glm::value_ptr(PMatrix));
+	glUniformMatrix4fv(shader->getUniformLocation("ITMV"), 1, false, glm::value_ptr(ITMV));
+	glUniformMatrix4fv(shader->getUniformLocation("MVP"), 1, false, glm::value_ptr(MVPMatrix));
 	glUniform1i(shader->getUniformLocation("hasTexture"), hasTexture);
 	if (hasTexture)
 		glUniform1iv(shader->getUniformLocation("textureArray"),textureNumber.size(), &textureNumber[0]);
@@ -76,7 +76,7 @@ int Model::sendUniformData()
 	glUniform1f(shader->getUniformLocation("shinniness"), shinniness);
 	glUniform4f( shader->getUniformLocation("color"), color.r, color.g, color.b, color.a);
 	glUniform4f( shader->getUniformLocation("specularColor"), specularColor.r, specularColor.g, specularColor.b, specularColor.a);
-	//światło
+	//swiatlo
 	glUniform1i(shader->getUniformLocation("lightNumber"), light.size());
 	for (unsigned int i = 0 ; i < light.size() ; i++)
 	{
@@ -89,11 +89,10 @@ int Model::sendUniformData()
 		glUniform1i( shader->getUniformLocation(oss.str() + "].type"), light[i].type);
 
 	}
-	//
 
 	return 0;
 }
-int Model::enableLight() //nieużywane
+int Model::enableLight() //nieuzywane
 {
 	glUniformBlockBinding(shader->getID(), shader->getUniformBlockIndex("LightBlock"), 1);//???
 	glGenBuffers(1, &lightBuffer);
@@ -104,7 +103,7 @@ int Model::enableLight() //nieużywane
 }
 Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 {
-#if DEBUG == 1 
+#if DEBUG == 1
 	fprintf(stderr,"ladowanie modelu: %s\n", fileName);
 	clock_t begin = clock();
 #endif
@@ -113,7 +112,7 @@ Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 	if (whichMesh != nullptr)
 		*whichMesh = readOBJ(fileName, whichMesh);
 	else readOBJ(fileName);
-	//glGenVertexArrays(1,&vertexArrayID); // ??? osobne dla każdego modelu czy nie?
+	//glGenVertexArrays(1,&vertexArrayID); // ??? osobne dla kazdego modelu czy nie?
 	glBindVertexArray(this->vertexArrayID);
 	assignVBO("vertex", vertexbuffer, 3);
 	assignVBO("Normals", normalsBuffer, 3);
@@ -126,13 +125,13 @@ Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 	angle = glm::vec3(0, 0, 0);
 	sc = glm::vec3(1, 1, 1);
 	center = glm::vec3(0, 0, 0);
-#if DEBUG == 1 
+#if DEBUG == 1
 	clock_t end = clock();
 	double elapsed = (1000 * double(end - begin)/CLOCKS_PER_SEC);
 	fprintf(stderr,"czas: %f ms\n", elapsed);
 #endif
 
-	//	enableLight();
+	//enableLight();
 }
 int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 {
@@ -174,7 +173,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 			fprintf(stderr,"plik nie wspolrzednych teksturowania: %s\n", fileName);
 		if (!mesh->HasNormals())
 			fprintf(stderr,"plik nie ma normalnych: %s\n", fileName);
-		for ( int j = 0 ; j < iMeshFaces ; j++)
+		for (int j = 0 ; j < iMeshFaces ; j++)
 		{
 			const aiFace& face = mesh->mFaces[j];
 			for(int k = 0 ; k < 3 ; k++)
@@ -187,7 +186,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 				for(int k = 0 ; k < 3 ; k++)
 				{
 					aiVector3t<float> uv = mesh->mTextureCoords[0][face.mIndices[k]];
-					texture.push_back(glm::vec2(uv.x,1 - uv.y));//odwrócić y
+					texture.push_back(glm::vec2(uv.x,1 - uv.y));//odwrocic y
 				}
 			}
 			if (mesh->HasNormals())
@@ -214,7 +213,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 				float denominator = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
 				glm::vec3 tangent = (deltaPos1 * deltaUV2.y   - deltaPos2 * deltaUV1.y)*denominator;
 				glm::vec3 bitangent = (deltaPos2 * deltaUV1.x   - deltaPos1 * deltaUV2.x)*denominator;
-				//robienie by tangent był prostopadły ???
+				//robienie by tangent byl prostopadly ???
 				glm::vec3 tangentTemp;
 				glm::vec3 n = normals[c - 3];
 				tangentTemp = glm::normalize(tangent - n * glm::dot(n, tangent));
@@ -225,7 +224,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 				n = normals[c - 1];
 				tangentTemp = glm::normalize(tangent - n * glm::dot(n, tangent));
 				tangents.push_back(tangentTemp);
-				//ładujemy do vectora
+				//ladujemy do vectora
 				bitangents.push_back(bitangent);
 				bitangents.push_back(bitangent);
 				bitangents.push_back(bitangent);
@@ -234,7 +233,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 		}
 		totalVertices += mesh->mNumVertices;
 	}
-	// generowanie buforów i wpisanie tam wczytanych danych
+	// generowanie buforow i wpisanie tam wczytanych danych
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_STATIC_DRAW);
@@ -259,7 +258,7 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 	verticesAmount = totalVertices;
 	return scene->mNumMeshes;
 }
-Model::~Model()// tu pewnie dużo brakuje
+Model::~Model()// tu pewnie duzo brakuje
 {
 	for(unsigned i = 0; i < texture.size() ; i++)
 	{
@@ -285,12 +284,12 @@ int Model::textureUse(unsigned location, int number)
 int Model::textureLoad(const char * fileName, int mipmap, int number)
 {
 	int location = -1;
-#if DEBUG == 1 
+#if DEBUG == 1
 	fprintf(stderr,"ladowanie tekstury: %s\n", fileName);
 	clock_t begin = clock();
 #endif
 
-	if ((number < 0) || ((unsigned)number >= texture.size())) //jeśli nie ma takiego numeru wczytaj jako nową
+	if ((number < 0) || ((unsigned)number >= texture.size())) //jesli nie ma takiego numeru wczytaj jako nową
 	{
 		number = texture.size();
 		textureNumber.push_back(globalTextureNumber);
@@ -342,7 +341,7 @@ int Model::textureLoad(const char * fileName, int mipmap, int number)
 			*/	hasTexture = 1;
 		location = textureNumber[number];
 	}
-#if DEBUG == 1 
+#if DEBUG == 1
 	clock_t end = clock();
 	double elapsed = (1000 * double(end - begin)/CLOCKS_PER_SEC);
 	fprintf(stderr,"czas: %f ms\n", elapsed);
@@ -351,7 +350,7 @@ int Model::textureLoad(const char * fileName, int mipmap, int number)
 }
 int Model::bumpTextureLoad(const char * fileName, int number)
 {
-	if ((number < 0) || ((unsigned)number >= texture.size())) //jeśli nie ma takiego numeru wczytaj jako nową
+	if ((number < 0) || ((unsigned)number >= texture.size())) //jesli nie ma takiego numeru wczytaj jako nową
 	{
 		hasBump = texture.size();
 	}
@@ -396,10 +395,10 @@ void Model::assignVBO(const char * name, GLuint buf, int points)
 	//glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(
 			location,
-			points,				//rozmiar
-			GL_FLOAT,           //typ
-			GL_FALSE,           //znormalizowane?
-			0,                  // stride
-			(void*)0            // array buffer offset
+			points,		//rozmiar
+			GL_FLOAT,       //typ
+			GL_FALSE,       //znormalizowane?
+			0,              // stride
+			(void*)0        // array buffer offset
 			);
 }

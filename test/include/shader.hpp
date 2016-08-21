@@ -16,7 +16,6 @@ class ShaderProgram
 		GLuint getUniformLocation(const std::string name);
 		void on();
 		GLuint getID(){return programID;};
-		
 
 		ShaderProgram(const char *vertex_file_path,const char *fragment_file_path); // można to poprawić
 		~ShaderProgram();
