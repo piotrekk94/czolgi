@@ -25,8 +25,8 @@ public:
   void updateCamera();
   void toggleFirstPerson();
   void textureLoad(const char * fileName);
-  float speed = 0;
 private:
+  float speed = 0;
   bool firstPerson = false;
   bool accelerated = false;
   ShaderProgram *shader;

@@ -27,7 +27,6 @@ public:
 	//renderowanie wszystkich czastek
 	void draw();
 private:
-
 	// stan rendera
 	ShaderProgram shader;
 	Model texture;
