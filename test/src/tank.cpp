@@ -15,8 +15,10 @@ Tank::Tank(const char *fileName, ShaderProgram *shader, Camera *camera){
   hullRoatation = turretRotation = gunRotation = 0;
 
   parts[KADLUB].textureLoad("./tekstury/hull.dds");
-  parts[WIEZA].textureLoad("./tekstury/hull.dds");
-  parts[LUFA].textureLoad("./tekstury/hull.dds");
+//  parts[WIEZA].textureLoad("./tekstury/hull.dds");
+//  parts[LUFA].textureLoad("./tekstury/hull.dds");
+  parts[WIEZA].textureShare(parts[KADLUB].getTexture(0));
+  parts[LUFA].textureShare(parts[KADLUB].getTexture(0));
   parts[GASIENICA0].textureLoad("./tekstury/treads.png");
   parts[GASIENICA1].textureLoad("./tekstury/treads.png");
   //paweł

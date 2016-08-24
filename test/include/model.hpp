@@ -3,6 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <SOIL/SOIL.h>
 #include <ctime>
+#include <memory> // shared_ptr
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -10,6 +11,7 @@
 #include <assimp/vector3.h>
 
 #include "shader.hpp"
+#include "texture.hpp"
 #define DEBUG 1
 struct Light
 {
@@ -42,8 +44,13 @@ class Model
 		~Model();
 		int setMMatrix(glm::mat4 MMatrix);
 
-		int textureLoad(const char *fileName, int mipmap = 0, int number = -1);
+		int textureLoad(const char *fileName, int number = -1);
 		int bumpTextureLoad(const char *fileName, int number = -1);
+		int textureShare(const std::shared_ptr<Texture> *ptr, int number = -1);
+		int bumpTextureShare(const std::shared_ptr<Texture> *ptr, int number = -1);
+		const std::shared_ptr<Texture> *getTexture(int number){
+		return &textures[number];};
+
 		static std::vector<Light> light;
 		static float ambient;
 		float shinniness = 10;
@@ -68,14 +75,19 @@ class Model
 		GLint hasTextureCoords = 0;
 		void assignVBO(const char * name, GLuint buf, int points);
 		GLuint vertexbuffer;
-		GLuint textureBuffer;
-		std::vector<int> textureNumber;
-		static int globalTextureNumber;
+
+		GLuint textureBuffer; // koordynaty teksturowania
+		//std::vector<int> textureNumber;
+		//static int globalTextureNumber;
+		//std::vector<GLuint> texture;
+
+		//
+		std::vector<std::shared_ptr<Texture>> textures;
+		//
 		GLuint normalsBuffer;
 		GLuint tangentsBuffer;
 		GLuint bitangentsBuffer;
 		GLuint lightBuffer;
-		std::vector<GLuint> texture;
 		GLuint vertexArrayID;
 		glm::mat4 MMatrix = glm::mat4(1.0f);
 		static glm::mat4 VMatrix;

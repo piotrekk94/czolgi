@@ -4,7 +4,7 @@ std::vector<Light> Model::light;
 glm::mat4 Model::VMatrix = glm::mat4(1.0f);
 glm::mat4 Model::PMatrix = glm::mat4(1.0f);
 float Model::ambient = 0;
-int Model::globalTextureNumber = 0;
+//int Model::globalTextureNumber = 0;
 
 void Model::setPos(float x, float y, float z){
 	pos = glm::vec3(x, y, z);
@@ -34,11 +34,14 @@ int Model::draw()
 	sendUniformData();
 	if (hasTexture)
 	{
-		for (unsigned i=0; i < texture.size() ; i++)
+		for (unsigned i=0; i < textures.size() ; i++)
 		{
+			textures[i]->activate();
+			/*
 			glActiveTexture(textureNumber[i]);
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, texture[i]);
+			*/
 		}
 	}
 	glBindVertexArray(vertexArrayID);
@@ -48,11 +51,13 @@ int Model::draw()
 	//
 	if (hasTexture)
 	{
-		for (unsigned i=0; i < texture.size() ; i++)
+		for (unsigned i=0; i < textures.size() ; i++)
 		{
-			glActiveTexture(textureNumber[i]);
+			textures[i]->deactivate();
+	/*		glActiveTexture(textureNumber[i]);
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
+			*/
 		}
 	}
 	return 0;
@@ -70,7 +75,15 @@ int Model::sendUniformData()
 	glUniformMatrix4fv(shader->getUniformLocation("MVP"), 1, false, glm::value_ptr(MVPMatrix));
 	glUniform1i(shader->getUniformLocation("hasTexture"), hasTexture);
 	if (hasTexture)
-		glUniform1iv(shader->getUniformLocation("textureArray"),textureNumber.size(), &textureNumber[0]);
+	{
+		int * locationArray = new int[textures.size()];
+		for (unsigned i=0; i < textures.size() ; i++)
+		{
+			locationArray[i] = textures[i]->getTextureLocation();
+		}
+		glUniform1iv(shader->getUniformLocation("textureArray"),textures.size(), &locationArray[0]);
+		delete[] locationArray;
+	}
 	glUniform1i(shader->getUniformLocation("hasBump"), hasBump);
 	glUniform1f(shader->getUniformLocation("ambient"), ambient);
 	glUniform1f(shader->getUniformLocation("shinniness"), shinniness);
@@ -260,11 +273,13 @@ int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 }
 Model::~Model()// tu pewnie duzo brakuje
 {
+	/*
 	for(unsigned i = 0; i < texture.size() ; i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + textureNumber[i]);
 		glDeleteTextures(1,&texture[i]);
 	}
+	*/
 }
 /*
 int Model::textureUse(unsigned location, int number)
@@ -281,84 +296,112 @@ int Model::textureUse(unsigned location, int number)
 	}
 }
 */
-int Model::textureLoad(const char * fileName, int mipmap, int number)
+int Model::textureLoad(const char * fileName, int number)
 {
-	int location = -1;
+	//int location = -1;
 #if DEBUG == 1
 	fprintf(stderr,"ladowanie tekstury: %s\n", fileName);
 	clock_t begin = clock();
 #endif
-
-	if ((number < 0) || ((unsigned)number >= texture.size())) //jesli nie ma takiego numeru wczytaj jako nową
-	{
-		number = texture.size();
-		textureNumber.push_back(globalTextureNumber);
-		texture.push_back(0);
-		globalTextureNumber++;
-	}
 	if (hasTextureCoords)
 	{
+		if ((number < 0) || ((unsigned)number >= textures.size())) //jesli nie ma takiego numeru wczytaj jako nową
+		{
+			number = textures.size();
+			textures.push_back(nullptr);
+		}
+		textures[number] = std::make_shared<Texture>();
+		textures[number]->read(fileName);
+	}
+	/*	if (hasTextureCoords)
+		{
 		int width, height, channels;
 		std::string fileNameStr(fileName);
 		size_t dot = fileNameStr.find_last_of(".");
 		std::string ext;
 		if (dot != std::string::npos)
 		{
-			ext = fileNameStr.substr(dot);
+		ext = fileNameStr.substr(dot);
 		}
 		if (ext.compare(".dds") == 0)
 		{
 
-			fprintf(stderr,"ladowanie %s\n",ext.c_str());
-			unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels, SOIL_FLAG_DDS_LOAD_DIRECT);
-			glActiveTexture(GL_TEXTURE0 + textureNumber[number]);
-			glGenTextures(1, &(texture[number]));
-			glBindTexture(GL_TEXTURE_2D, texture[number]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		fprintf(stderr,"ladowanie %s\n",ext.c_str());
+		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels, SOIL_FLAG_DDS_LOAD_DIRECT);
+		glActiveTexture(GL_TEXTURE0 + textureNumber[number]);
+		glGenTextures(1, &(texture[number]));
+		glBindTexture(GL_TEXTURE_2D, texture[number]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 		}
 		else
 		{
-			unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
-			glActiveTexture(GL_TEXTURE0 + textureNumber[number]);
-			glGenTextures(1, &(texture[number]));
-			glBindTexture(GL_TEXTURE_2D, texture[number]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
+		glActiveTexture(GL_TEXTURE0 + textureNumber[number]);
+		glGenTextures(1, &(texture[number]));
+		glBindTexture(GL_TEXTURE_2D, texture[number]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 		}
-		//	if (mipmap)
-		{
-			glGenerateMipmap(GL_TEXTURE_2D);
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-			glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-			GLfloat largestAnisotropy;
-			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &largestAnisotropy);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, largestAnisotropy);
-		}
-		/*	else
-			{
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			}
-			*/	hasTexture = 1;
-		location = textureNumber[number];
+	//	if (mipmap)
+	{
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	GLfloat largestAnisotropy;
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &largestAnisotropy);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, largestAnisotropy);
 	}
+	//	else
+	//	{
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//	}
+	location = textureNumber[number];
+	}*/
+	hasTexture = 1;
 #if DEBUG == 1
 	clock_t end = clock();
 	double elapsed = (1000 * double(end - begin)/CLOCKS_PER_SEC);
 	fprintf(stderr,"czas: %f ms\n", elapsed);
 #endif
-	return location;
+	return textures[number]->getTextureLocation();
 }
 int Model::bumpTextureLoad(const char * fileName, int number)
 {
-	if ((number < 0) || ((unsigned)number >= texture.size())) //jesli nie ma takiego numeru wczytaj jako nową
+	if ((number < 0) || ((unsigned)number >= textures.size())) //jesli nie ma takiego numeru wczytaj jako nową
 	{
-		hasBump = texture.size();
+		hasBump = textures.size();
 	}
 	else
 	{
 		hasBump = number;
 	}
-	return textureLoad(fileName);
+	return textureLoad(fileName, number);
+}
+int Model::textureShare(const std::shared_ptr<Texture> *ptr, int number)
+{
+	if (hasTextureCoords)
+	{
+		if ((number < 0) || ((unsigned)number >= textures.size())) //jesli nie ma takiego numeru wczytaj jako nową
+		{
+			number = textures.size();
+			textures.push_back(nullptr);
+		}
+		textures[number] = *ptr;
+	}
+	return 0;
+}
+int Model::bumpTextureShare(const std::shared_ptr<Texture> *ptr, int number)
+{
+	
+	if ((number < 0) || ((unsigned)number >= textures.size())) //jesli nie ma takiego numeru wczytaj jako nową
+	{
+		hasBump = textures.size();
+	}
+	else
+	{
+		hasBump = number;
+	}
+	return textureShare(ptr, number);
 }
 int Model::setMMatrix(glm::mat4 MMatrix)
 {
