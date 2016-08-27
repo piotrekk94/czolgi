@@ -44,11 +44,11 @@ int Model::draw()
 			*/
 		}
 	}
-	glBindVertexArray(vertexArrayID);
+	vbo->activate();
 	glDrawArrays(GL_TRIANGLES, 0, verticesAmount );
 	//glDisableVertexAttribArray(0);
-	glBindVertexArray(0);
 	//
+	vbo->deactivate();
 	if (hasTexture)
 	{
 		for (unsigned i=0; i < textures.size() ; i++)
@@ -121,18 +121,11 @@ Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 	clock_t begin = clock();
 #endif
 	this->shader = shader;
-	glGenVertexArrays(1,&this->vertexArrayID); // ??? raczej osobne
-	if (whichMesh != nullptr)
+	if (whichMesh != nullptr)//!!!
 		*whichMesh = readOBJ(fileName, whichMesh);
 	else readOBJ(fileName);
+	verticesAmount = vbo->getVerticesAmount();
 	//glGenVertexArrays(1,&vertexArrayID); // ??? osobne dla kazdego modelu czy nie?
-	glBindVertexArray(this->vertexArrayID);
-	assignVBO("vertex", vertexbuffer, 3);
-	assignVBO("Normals", normalsBuffer, 3);
-	assignVBO("vertexTexture", textureBuffer, 2);
-	assignVBO("bitangents", bitangentsBuffer, 3);
-	assignVBO("tangents", tangentsBuffer, 3);
-	glBindVertexArray(0);
 
 	pos = glm::vec3(0, 0, 0);
 	angle = glm::vec3(0, 0, 0);
@@ -148,138 +141,10 @@ Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 }
 int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 {
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> tangents;
-	std::vector<glm::vec3> bitangents;
-	std::vector<glm::vec2> texture;
-	std::vector<glm::vec3> normals;
-	int totalVertices = 0;
-	Assimp::Importer importer;
-	const aiScene * scene = importer.ReadFile( fileName, aiProcess_Triangulate/* | aiProcess_GenNormals | aiProcess_FixInfacingNormals*/);
-	if (!scene)
-	{
-		fprintf(stderr,"Blad odczytu: %s\n", fileName);
-	}
-	unsigned int meshesAmount = scene -> mNumMeshes;
-	unsigned i = 0;
-	if (whichMesh != nullptr )
-	{
-		if (*whichMesh < meshesAmount)
-		{
-			i = *whichMesh;
-			meshesAmount = i + 1;
-		}
-		else
-		{
-			fprintf(stderr,"nie ma siatki o takim numerze wczytuje 0: %s\n", fileName);
-			i = 0;
-			meshesAmount = i + 1;
-		}
-	}
-	for(; i < meshesAmount ; i++)
-	{
-		aiMesh * mesh = scene->mMeshes[i];
-		int iMeshFaces = mesh->mNumFaces;
-		if (mesh->HasTextureCoords(0))
-			hasTextureCoords = 1;
-		else
-			fprintf(stderr,"plik nie wspolrzednych teksturowania: %s\n", fileName);
-		if (!mesh->HasNormals())
-			fprintf(stderr,"plik nie ma normalnych: %s\n", fileName);
-		for (int j = 0 ; j < iMeshFaces ; j++)
-		{
-			const aiFace& face = mesh->mFaces[j];
-			for(int k = 0 ; k < 3 ; k++)
-			{
-				aiVector3t<float> pos = mesh->mVertices[face.mIndices[k]];
-				vertices.push_back(glm::vec3(pos.x,pos.y,pos.z));
-			}
-			if (mesh->HasTextureCoords(0))
-			{
-				for(int k = 0 ; k < 3 ; k++)
-				{
-					aiVector3t<float> uv = mesh->mTextureCoords[0][face.mIndices[k]];
-					texture.push_back(glm::vec2(uv.x,1 - uv.y));//odwrocic y
-				}
-			}
-			if (mesh->HasNormals())
-			{
-				for(int k = 0 ; k < 3 ; k++)
-				{
-					aiVector3t<float> temp = mesh->mNormals[face.mIndices[k]];
-					normals.push_back(glm::vec3(temp.x,temp.y,temp.z));
-				}
-			}
-			if (mesh->HasNormals() && mesh->HasTextureCoords(0))
-			{
-				// obliczanie tangent i bitangent
-				unsigned c = vertices.size();
-				// v1 - v0
-				glm::vec3 deltaPos1 = vertices[c - 2] - vertices[c - 3];
-				// v2 - v0
-				glm::vec3 deltaPos2 = vertices[c - 1] - vertices[c - 3];
-				// uv1 - uv0
-				glm::vec2 deltaUV1 = texture[c - 2] - texture[c - 3];
-				// uv2 - uv0
-				glm::vec2 deltaUV2 = texture[c - 1] - texture[c - 3];
-				//
-				float denominator = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-				glm::vec3 tangent = (deltaPos1 * deltaUV2.y   - deltaPos2 * deltaUV1.y)*denominator;
-				glm::vec3 bitangent = (deltaPos2 * deltaUV1.x   - deltaPos1 * deltaUV2.x)*denominator;
-				//robienie by tangent byl prostopadly ???
-				glm::vec3 tangentTemp;
-				glm::vec3 n = normals[c - 3];
-				tangentTemp = glm::normalize(tangent - n * glm::dot(n, tangent));
-				tangents.push_back(tangentTemp);
-				n = normals[c - 2];
-				tangentTemp = glm::normalize(tangent - n * glm::dot(n, tangent));
-				tangents.push_back(tangentTemp);
-				n = normals[c - 1];
-				tangentTemp = glm::normalize(tangent - n * glm::dot(n, tangent));
-				tangents.push_back(tangentTemp);
-				//ladujemy do vectora
-				bitangents.push_back(bitangent);
-				bitangents.push_back(bitangent);
-				bitangents.push_back(bitangent);
-
-			}
-		}
-		totalVertices += mesh->mNumVertices;
-	}
-	// generowanie buforow i wpisanie tam wczytanych danych
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_STATIC_DRAW);
-
-	glGenBuffers(1, &textureBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
-	glBufferData(GL_ARRAY_BUFFER, texture.size() * sizeof(texture[0]), &texture[0], GL_STATIC_DRAW);
-
-	glGenBuffers(1, &tangentsBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, tangentsBuffer);
-	glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(tangents[0]), &tangents[0], GL_STATIC_DRAW);
-
-	glGenBuffers(1, &bitangentsBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, bitangentsBuffer);
-	glBufferData(GL_ARRAY_BUFFER, bitangents.size() * sizeof(bitangents[0]), &bitangents[0], GL_STATIC_DRAW);
-
-	glGenBuffers(1, &normalsBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(normals[0]), &normals[0], GL_STATIC_DRAW);
-	//
-
-	verticesAmount = totalVertices;
-	return scene->mNumMeshes;
+	vbo = std::make_shared<VBO>(shader, fileName, &hasTextureCoords, whichMesh);
 }
 Model::~Model()// tu pewnie duzo brakuje
 {
-	/*
-	for(unsigned i = 0; i < texture.size() ; i++)
-	{
-		glActiveTexture(GL_TEXTURE0 + textureNumber[i]);
-		glDeleteTextures(1,&texture[i]);
-	}
-	*/
 }
 /*
 int Model::textureUse(unsigned location, int number)
@@ -312,52 +177,8 @@ int Model::textureLoad(const char * fileName, int number)
 		}
 		textures[number] = std::make_shared<Texture>();
 		textures[number]->read(fileName);
+		hasTexture = 1;
 	}
-	/*	if (hasTextureCoords)
-		{
-		int width, height, channels;
-		std::string fileNameStr(fileName);
-		size_t dot = fileNameStr.find_last_of(".");
-		std::string ext;
-		if (dot != std::string::npos)
-		{
-		ext = fileNameStr.substr(dot);
-		}
-		if (ext.compare(".dds") == 0)
-		{
-
-		fprintf(stderr,"ladowanie %s\n",ext.c_str());
-		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels, SOIL_FLAG_DDS_LOAD_DIRECT);
-		glActiveTexture(GL_TEXTURE0 + textureNumber[number]);
-		glGenTextures(1, &(texture[number]));
-		glBindTexture(GL_TEXTURE_2D, texture[number]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-		}
-		else
-		{
-		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
-		glActiveTexture(GL_TEXTURE0 + textureNumber[number]);
-		glGenTextures(1, &(texture[number]));
-		glBindTexture(GL_TEXTURE_2D, texture[number]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-		}
-	//	if (mipmap)
-	{
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	GLfloat largestAnisotropy;
-	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &largestAnisotropy);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, largestAnisotropy);
-	}
-	//	else
-	//	{
-	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//	}
-	location = textureNumber[number];
-	}*/
-	hasTexture = 1;
 #if DEBUG == 1
 	clock_t end = clock();
 	double elapsed = (1000 * double(end - begin)/CLOCKS_PER_SEC);
@@ -429,19 +250,4 @@ void Model::scale(glm::vec3 vector)
 void Model::rotate(float angle, glm::vec3 vector)
 {
 	MMatrix = glm::rotate(MMatrix, angle, vector);
-}
-void Model::assignVBO(const char * name, GLuint buf, int points)
-{
-	GLuint location = shader->getAttribLocation(name);
-	glBindBuffer(GL_ARRAY_BUFFER, buf);
-	glEnableVertexAttribArray(location);
-	//glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glVertexAttribPointer(
-			location,
-			points,		//rozmiar
-			GL_FLOAT,       //typ
-			GL_FALSE,       //znormalizowane?
-			0,              // stride
-			(void*)0        // array buffer offset
-			);
 }

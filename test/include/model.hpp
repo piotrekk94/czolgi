@@ -12,6 +12,7 @@
 
 #include "shader.hpp"
 #include "texture.hpp"
+#include "vbo.hpp"
 #define DEBUG 1
 struct Light
 {
@@ -70,13 +71,14 @@ class Model
 		//std::vector<GLfloat> vertex;
 		int verticesAmount;
 		ShaderProgram *shader = nullptr;
+		std::shared_ptr<VBO> vbo;
 		GLint hasTexture = 0;
 		GLint hasBump = 0;
 		GLint hasTextureCoords = 0;
 		void assignVBO(const char * name, GLuint buf, int points);
-		GLuint vertexbuffer;
+		//GLuint vertexbuffer;
 
-		GLuint textureBuffer; // koordynaty teksturowania
+		//GLuint textureBuffer; // koordynaty teksturowania
 		//std::vector<int> textureNumber;
 		//static int globalTextureNumber;
 		//std::vector<GLuint> texture;
@@ -84,11 +86,11 @@ class Model
 		//
 		std::vector<std::shared_ptr<Texture>> textures;
 		//
-		GLuint normalsBuffer;
-		GLuint tangentsBuffer;
-		GLuint bitangentsBuffer;
+		//GLuint normalsBuffer;
+		//GLuint tangentsBuffer;
+		//GLuint bitangentsBuffer;
 		GLuint lightBuffer;
-		GLuint vertexArrayID;
+		//GLuint vertexArrayID;
 		glm::mat4 MMatrix = glm::mat4(1.0f);
 		static glm::mat4 VMatrix;
 		static glm::mat4 PMatrix;
