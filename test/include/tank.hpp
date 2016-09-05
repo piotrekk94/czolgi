@@ -25,6 +25,10 @@ public:
   void updateCamera();
   void toggleFirstPerson();
   void textureLoad(const char * fileName);
+  void setHeight(float y){
+  	position.y = y;};
+  float x(){return position.x;};
+  float z(){return position.z;};
 private:
   float speed = 0;
   bool firstPerson = false;

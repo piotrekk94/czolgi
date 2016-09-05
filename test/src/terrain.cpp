@@ -122,18 +122,24 @@ int Terrain::calculateNormals()
 		for(int j = 0; j < columns; j++)
 		{
 			normalToPoint = glm::vec3(0);
-			if ((i != 0) && (j != columns - 1))
-				normalToPoint += normals[0 + 2 * (j - 1) + 2 * i * columns];
+			if ((i != 0) && (j != (columns - 1)))
+				normalToPoint += normals[0 + 2 * j  + 2 * (i - 1) * columns];
 			if ((i != 0) && (j != 0))
 				for (int k = 0; k < 2 ; k++) 
 					normalToPoint += normals[k + 2 * (j - 1) + 2 * (i - 1) * columns];
-			if ((i != rows - 1) && (j != columns - 1))
+			if ((i != (rows - 1)) && (j != (columns - 1)))
 				for (int k = 0; k < 2 ; k++) 
 					normalToPoint += normals[k + 2 * j + 2 * i * columns];
-			if ((i != rows - 1) && (j != 0))
+			if ((i != (rows - 1)) && (j != 0))
 				normalToPoint += normals[1 + 2 * (j - 1) + 2 * i * columns];
 			normalsToPoint.push_back(glm::normalize(normalToPoint));
 		}
 	}
 	return 0;
+}
+float Terrain::getHeight(float x, float z)
+{
+int i = ((x / sc.x) + 0.5f) * (columns - 1);
+int j = ((z / sc.z) + 0.5f) * (rows - 1);
+return points[i + j * columns].y * sc.y;
 }

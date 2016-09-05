@@ -15,6 +15,7 @@ class Terrain: public Model
 
 		virtual int draw();
 		Terrain(ShaderProgram *ptrShader, const char *fileName);
+		float getHeight(float x, float z);
 	private:
 		int calculateIndices();
 		int rows, columns, channels;

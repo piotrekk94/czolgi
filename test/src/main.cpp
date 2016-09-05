@@ -106,6 +106,7 @@ int mainLoop()
 	Model::light.push_back(light);
 	float ldx = 0, ldy = 0;
 	glm::mat4 ProjectionMatrix = glm::perspective(45.0f, float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
+	models[1].setPos(x,teren.getHeight(x,z),z);
 	Model::setPMatrix(ProjectionMatrix);
 	do{
 		double startTime = glfwGetTime();
@@ -116,7 +117,7 @@ int mainLoop()
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		x += 0.1f;
-		models[1].setPos(x,y,z);
+	//	models[1].setPos(x,y,z);
 		for (unsigned i = 0; i < models.size(); i++) {
 			models[i].draw();
 		}
@@ -129,6 +130,7 @@ int mainLoop()
 		fpsMeter();
 		handleKeys(&tank);
 		tank.move(deltaTime);
+		tank.setHeight(teren.getHeight(tank.x(),tank.z()));	
 	}
 	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 	return 0;
