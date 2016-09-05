@@ -21,7 +21,6 @@ void Model::setCenter(float x, float y, float z){
 
 int Model::draw()
 {
-
 	MMatrix = glm::mat4(1.0f);
 	translate(center);
 	translate(pos);
@@ -114,6 +113,11 @@ int Model::enableLight() //nieuzywane
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, lightBuffer);
 	return 0;
 }
+Model::Model(ShaderProgram *shader, std::vector<glm::vec3> *points, std::vector<glm::vec2> *textureCoordinates , std::vector<glm::vec3> *normals)
+{
+vbo = std::make_shared<VBO>(shader, points, textureCoordinates, normals);
+verticesAmount = vbo->getVerticesAmount();
+}
 Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 {
 #if DEBUG == 1
@@ -142,6 +146,7 @@ Model::Model(const char * fileName, ShaderProgram * shader, unsigned *whichMesh)
 int Model::readOBJ(const char *fileName, unsigned *whichMesh)
 {
 	vbo = std::make_shared<VBO>(shader, fileName, &hasTextureCoords, whichMesh);
+	return 0;
 }
 Model::~Model()// tu pewnie duzo brakuje
 {

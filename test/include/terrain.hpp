@@ -5,20 +5,26 @@
 #include <SOIL/SOIL.h>
 #include <ctime>
 #include "shader.hpp"
+#include "model.hpp"
 
 #define DEBUG 1
 
-class Terrain
+class Terrain: public Model
 {
 	public:
 
-		int draw();
-		float shinniness = 10;
-		glm::vec4 color = glm::vec4(1,1,0,0);
-		glm::vec4 specularColor = glm::vec4(1,1,1,0);
+		virtual int draw();
+		Terrain(ShaderProgram *ptrShader, const char *fileName);
 	private:
-		ShaderProgram *shader = nullptr;
+		int calculateIndices();
+		int rows, columns, channels;
+		int calculateNormals();
+		int loadHeightMap(const char *fileName);
+		std::vector<unsigned> indices;
+		std::vector<glm::vec3> points;
+		std::vector<glm::vec2> textureCoordinates;
+		std::vector<glm::vec3> normals;
+		std::vector<glm::vec3> normalsToPoint;
 		void assignVBO(const char * name, GLuint buf, int points);
-		GLuint texture;
-		GLuint vertexArrayID;
+	float Scale;
 };

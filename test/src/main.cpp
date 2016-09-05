@@ -9,6 +9,7 @@
 #include "camera.hpp"
 #include "tank.hpp"
 #include "particles.hpp"
+#include "terrain.hpp"
 
 int mainLoop();
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -66,7 +67,7 @@ int main(int argc, char **argv)
 	glClearColor(0.0f, 0.0f, 0.2f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 	glGenVertexArrays(1, &VertexArrayID);
 
 	mainLoop();
@@ -89,6 +90,9 @@ int mainLoop()
 	models[1].setScale(0.02,0.02,0.02);
 	models[1].textureLoad("./tekstury/farmhouse.dds");
 	models[1].bumpTextureLoad("./tekstury/farmhouseBumpToUse.dds",1);
+	Terrain teren(&Shader, "./tekstury/terrain.png");
+	teren.setPos(0,0,0);
+	teren.setScale(50,20,50);
 	Tank tank("models/tygrysv2.obj", &Shader, &camera);
 
 	glm::vec4 lightPosition = glm::vec4(0,3,30,1);
@@ -116,6 +120,7 @@ int mainLoop()
 		for (unsigned i = 0; i < models.size(); i++) {
 			models[i].draw();
 		}
+		teren.draw();
 		tank.draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();

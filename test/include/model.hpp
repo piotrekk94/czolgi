@@ -38,11 +38,13 @@ class Model
 		void setScale(float x, float y, float z);
 		void setCenter(float x, float y, float z);
 
-		int draw();
+		virtual int draw();
 
 		Model(const char *fileName, ShaderProgram *shader, unsigned *whichMesh = nullptr);
 		//whichMesh zwraca ile siatek jest w pliku
+		Model(ShaderProgram *shader, std::vector<glm::vec3> *points, std::vector<glm::vec2> *textureCoordinates , std::vector<glm::vec3> *normals);
 		~Model();
+
 		int setMMatrix(glm::mat4 MMatrix);
 
 		int textureLoad(const char *fileName, int number = -1);
@@ -57,7 +59,8 @@ class Model
 		float shinniness = 10;
 		glm::vec4 color = glm::vec4(1,1,0,0);
 		glm::vec4 specularColor = glm::vec4(1,1,1,0);
-	private:
+	protected:
+		Model(){};
 		glm::vec3 pos, angle, sc, center;
 
 		int enableLight(); //na razie nie wykorzystywana

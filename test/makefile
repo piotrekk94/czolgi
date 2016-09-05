@@ -19,7 +19,10 @@ $(OUT): $(OBJ)
 $(BUILD_DIR)/%.o : %.cpp
 	mkdir -p $(@D)
 	$(CCPP) -MMD -c $< -o $@ $(CPPFLAGS)
-
+#tu cos odwalilem dla nvim'a
+#.PHONY : $(SRC)
+$(notdir $(SRC)) :
+	$(CCPP) -c src/$@ -o $(BUILD_DIR)/$@.o $(CPPFLAGS)
 clean :
 	rm -f $(OBJ) $(DEP) $(OUT)
 	# jeszcze zostaje drzewo katalogów

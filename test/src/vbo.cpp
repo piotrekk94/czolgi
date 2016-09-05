@@ -1,4 +1,27 @@
 #include "vbo.hpp"
+VBO::VBO(ShaderProgram *shader, std::vector<glm::vec3> *points, std::vector<glm::vec2> *textureCoordinates , std::vector<glm::vec3> *normals, std::vector<GLuint> *indices)
+{
+	this->shader = shader;
+	glGenVertexArrays(1,&vertexArrayID); // ??? raczej osobne
+	activate();
+	fprintf(stderr,"generuje buffor wierzcholkow");
+	genBuf(&vertexBuffer, points);
+	fprintf(stderr,"generuje buffor textur");
+	genBuf(&textureBuffer, textureCoordinates );
+	fprintf(stderr,"generuje buffor normalnych");
+	genBuf(&normalsBuffer, normals);
+	if (indices != nullptr)
+	{
+	fprintf(stderr,"generuje buffor ");
+		elementArray = 1;
+		genBuf(&elementBuffer, indices, GL_ELEMENT_ARRAY_BUFFER);
+	}
+	assignVBO("vertex", vertexBuffer, 3);
+	assignVBO("Normals", normalsBuffer, 3);
+	assignVBO("vertexTexture", textureBuffer, 2);
+	verticesAmount = points->size();
+	deactivate();
+}
 int VBO::readOBJ(const char *fileName, int *hasTextureCoords, unsigned *whichMesh)
 {
 	std::vector<glm::vec3> vertices;
@@ -100,8 +123,8 @@ int VBO::readOBJ(const char *fileName, int *hasTextureCoords, unsigned *whichMes
 		totalVertices += mesh->mNumVertices;
 	}
 	// generowanie buforow i wpisanie tam wczytanych danych
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_STATIC_DRAW);
 
 	glGenBuffers(1, &textureBuffer);
@@ -122,7 +145,7 @@ int VBO::readOBJ(const char *fileName, int *hasTextureCoords, unsigned *whichMes
 	//
 
 	glBindVertexArray(this->vertexArrayID);
-	assignVBO("vertex", vertexbuffer, 3);
+	assignVBO("vertex", vertexBuffer, 3);
 	assignVBO("Normals", normalsBuffer, 3);
 	assignVBO("vertexTexture", textureBuffer, 2);
 	assignVBO("bitangents", bitangentsBuffer, 3);
@@ -144,21 +167,12 @@ VBO::VBO(ShaderProgram *shader, const char *fileName, int *hasTextureCoords, uns
 //{
 	
 //}
-int VBO::genBuf(GLuint *buffer, std::vector<glm::vec3> *vectorPtr)
-{
-	glGenBuffers(1, buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, *buffer);
-	glBufferData(GL_ARRAY_BUFFER,
-			vectorPtr->size() * sizeof(glm::vec3), //rozmiar
-			vectorPtr, //wskaźnik
-			GL_STATIC_DRAW); //
-}
-void VBO::assignVBO(const char * name, GLuint buffer, int points)
+void VBO::assignVBO(const char * name, GLuint buffer, int points, GLuint type)
 {
 	GLuint location = shader->getAttribLocation(name);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBindBuffer(type, buffer);
 	glEnableVertexAttribArray(location);
-	//glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	//glBindBuffer(type, vertexBuffer);
 	glVertexAttribPointer(
 			location,
 			points,		//rozmiar
