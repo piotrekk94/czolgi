@@ -19,7 +19,7 @@ int Terrain::draw()
 	rotate(angle.x, glm::vec3(1,0,0));
 	translate(-center);
 	scale(sc);
-	shader->on();
+	shader->use();
 	sendUniformData();
 	if (hasTexture)
 	{
@@ -70,7 +70,7 @@ int Terrain::loadHeightMap(const char *fileName)
 			points.push_back(point);
 			textureCoordinates.push_back(glm::vec2( j / columns, i / rows));
 		}
-		
+
 	}
 return 0;
 }
@@ -80,7 +80,7 @@ int Terrain::calculateIndices()
 	{
 		for(int j = 0; j < columns; j++)
 		{
-			for(int k = 0; k < 2 ; k++) 
+			for(int k = 0; k < 2 ; k++)
 			{
 				unsigned int row = i + (1 - k);
 				unsigned int index = row * columns + j;
@@ -125,10 +125,10 @@ int Terrain::calculateNormals()
 			if ((i != 0) && (j != (columns - 1)))
 				normalToPoint += normals[0 + 2 * j  + 2 * (i - 1) * columns];
 			if ((i != 0) && (j != 0))
-				for (int k = 0; k < 2 ; k++) 
+				for (int k = 0; k < 2 ; k++)
 					normalToPoint += normals[k + 2 * (j - 1) + 2 * (i - 1) * columns];
 			if ((i != (rows - 1)) && (j != (columns - 1)))
-				for (int k = 0; k < 2 ; k++) 
+				for (int k = 0; k < 2 ; k++)
 					normalToPoint += normals[k + 2 * j + 2 * i * columns];
 			if ((i != (rows - 1)) && (j != 0))
 				normalToPoint += normals[1 + 2 * (j - 1) + 2 * i * columns];

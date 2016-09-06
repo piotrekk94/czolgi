@@ -29,7 +29,7 @@ int Model::draw()
 	rotate(angle.x, glm::vec3(1,0,0));
 	translate(-center);
 	scale(sc);
-	shader->on();
+	shader->use();
 	sendUniformData();
 	if (hasTexture)
 	{
@@ -218,7 +218,7 @@ int Model::textureShare(const std::shared_ptr<Texture> *ptr, int number)
 }
 int Model::bumpTextureShare(const std::shared_ptr<Texture> *ptr, int number)
 {
-	
+
 	if ((number < 0) || ((unsigned)number >= textures.size())) //jesli nie ma takiego numeru wczytaj jako nową
 	{
 		hasBump = textures.size();

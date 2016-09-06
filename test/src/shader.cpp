@@ -16,9 +16,10 @@ GLuint ShaderProgram::getAttribLocation(const char *name)
 {
 	return glGetAttribLocation(programID, name);
 }
-void ShaderProgram::on()
+ShaderProgram &ShaderProgram::use()
 {
 	glUseProgram(programID);
+	return *this;
 }
 ShaderProgram::ShaderProgram(const char *vertex_file_path,const char *fragment_file_path) {
 
