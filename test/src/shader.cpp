@@ -105,3 +105,12 @@ std::string ShaderProgram::readFile(const char *fileName)
 	}
 	return text.str();
 }
+
+void ShaderProgram::setVector3f(const GLchar *name, const glm::vec3 &value)
+{
+	glUniform3f(glGetUniformLocation(this->programID, name), value.x, value.y, value.z);
+}
+void ShaderProgram::setVector4f(const GLchar *name, const glm::vec4 &value)
+{
+	glUniform4f(glGetUniformLocation(this->programID, name), value.x, value.y, value.z, value.w);
+}

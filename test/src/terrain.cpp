@@ -26,11 +26,6 @@ int Terrain::draw()
 		for (unsigned i=0; i < textures.size() ; i++)
 		{
 			textures[i]->activate();
-			/*
-			glActiveTexture(textureNumber[i]);
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, texture[i]);
-			*/
 		}
 	}
 	glEnable(GL_PRIMITIVE_RESTART);

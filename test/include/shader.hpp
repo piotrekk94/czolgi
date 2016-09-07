@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 #include <sstream>
 #include <fstream>
@@ -16,6 +17,9 @@ class ShaderProgram
 		GLuint getUniformLocation(const std::string name);
 		ShaderProgram &use();
 		GLuint getID(){return programID;};
+
+		void setVector3f(const GLchar *name, const glm::vec3 &value);
+    		void setVector4f(const GLchar *name, const glm::vec4 &value);
 
 		ShaderProgram(const char *vertex_file_path,const char *fragment_file_path); // można to poprawić
 		~ShaderProgram();

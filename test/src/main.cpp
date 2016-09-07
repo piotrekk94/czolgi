@@ -45,7 +45,6 @@ int main(int argc, char **argv)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-
 	window = glfwCreateWindow(windowWidth, windowHeight, "Czolgi", NULL, NULL);
 	if (window == NULL) {
 		fprintf(stderr, "Failed to open GLFW window.\n");
@@ -79,21 +78,20 @@ int main(int argc, char **argv)
 
 int mainLoop()
 {
-	int x = 0, y = 0, z = 0;
 	ShaderProgram Shader("vertex.vert", "fragment.frag");
+	Tank tank("models/tygrysv2.obj", &Shader, &camera);
+	Terrain teren(&Shader, "./tekstury/terrain.png");
+	teren.setPos(0,0,0);
+	teren.setScale(50,20,50);
 
 	models.push_back(Model("models/cube2.obj", &Shader));
 	models.push_back(Model("models/farmhousev2.obj", &Shader));
 	models[0].setPos(2,0,0);
-	models[1].setPos(x,y,z);
+	models[1].setPos(2,teren.getHeight(2,0),0);
 	models[1].setAngle(0,40,0);
 	models[1].setScale(0.02,0.02,0.02);
 	models[1].textureLoad("./tekstury/farmhouse.dds");
 	models[1].bumpTextureLoad("./tekstury/farmhouseBumpToUse.dds",1);
-	Terrain teren(&Shader, "./tekstury/terrain.png");
-	teren.setPos(0,0,0);
-	teren.setScale(50,20,50);
-	Tank tank("models/tygrysv2.obj", &Shader, &camera);
 
 	glm::vec4 lightPosition = glm::vec4(0,3,30,1);
 	Light light(lightPosition);
@@ -105,10 +103,11 @@ int mainLoop()
 	light.position = glm::vec4(0,5,5,0);
 	Model::light.push_back(light);
 	float ldx = 0, ldy = 0;
+
 	glm::mat4 ProjectionMatrix = glm::perspective(45.0f, float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
-	models[1].setPos(x,teren.getHeight(x,z),z);
 	Model::setPMatrix(ProjectionMatrix);
-	do{
+
+	do {
 		double startTime = glfwGetTime();
 		tank.updateCamera();
 		Model::setVMatrix(camera.getVMatrix());
@@ -116,8 +115,6 @@ int mainLoop()
 		Model::light[0].position = glm::vec4(ldx,ldy,0,1);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		x += 0.1f;
-	//	models[1].setPos(x,y,z);
 		for (unsigned i = 0; i < models.size(); i++) {
 			models[i].draw();
 		}
@@ -130,9 +127,8 @@ int mainLoop()
 		fpsMeter();
 		handleKeys(&tank);
 		tank.move(deltaTime);
-		tank.setHeight(teren.getHeight(tank.x(),tank.z()));	
-	}
-	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
+		tank.setHeight(teren.getHeight(tank.x(),tank.z()));
+	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 	return 0;
 }
 

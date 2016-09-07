@@ -3,25 +3,22 @@ int Texture::globalTextureNumber;
 
 Texture::Texture(const char * fileName)
 {
-read(fileName);
+	read(fileName);
 }
 int Texture::activate()
 {
 	glActiveTexture(GL_TEXTURE0 + textureLocation);
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, this->ID);
 	return 0;
 }
 int Texture::deactivate()
 {
-	glActiveTexture(GL_TEXTURE0 +textureLocation);
-	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0 + textureLocation);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return 0;
 }
 int Texture::read(const char * fileName)
 {
-
 	if (textureLocation < 0)
 	{
 		textureLocation = (globalTextureNumber);
@@ -41,16 +38,16 @@ int Texture::read(const char * fileName)
 		fprintf(stderr,"ladowanie %s\n",ext.c_str());
 		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels, SOIL_FLAG_DDS_LOAD_DIRECT);
 		glActiveTexture(GL_TEXTURE0 + textureLocation);
-		glGenTextures(1, &(texture));
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glGenTextures(1, &(ID));
+		glBindTexture(GL_TEXTURE_2D, ID);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	}
 	else
 	{
 		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
 		glActiveTexture(GL_TEXTURE0 + textureLocation);
-		glGenTextures(1, &(texture));
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glGenTextures(1, &(ID));
+		glBindTexture(GL_TEXTURE_2D, ID);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	}
 	//	if (mipmap)

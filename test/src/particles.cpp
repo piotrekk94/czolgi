@@ -29,16 +29,16 @@ void ParticleGenerator::draw()
 	// Use additive blending to give it a 'glow' effect
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	this->shader.use();
-	/*for (Particle particle : this->particles) {
+	for (Particle particle : this->particles) {
 		if (particle.life > 0.0f) {
-			this->shader.setVector2f("offset", particle.position);
+			this->shader.setVector3f("offset", particle.position);
 			this->shader.setVector4f("color", particle.color);
-			this->texture.bind();
+		//	this->texture.bind();
 			glBindVertexArray(this->VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glBindVertexArray(0);
 		}
-	}*/
+	}
 	// Don't forget to reset to default blending mode
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }

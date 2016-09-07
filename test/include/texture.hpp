@@ -13,11 +13,9 @@ class Texture{
 		int deactivate();
 		int getTexture();
 		int read(const char * fileName);
-		int getTextureLocation(){
-			return textureLocation;};
+		int getTextureLocation() {return textureLocation;};
 	private:
-//	GLuint textureBuffer;
-	int textureLocation = -1;
-	static int globalTextureNumber;
-	GLuint texture;
+		int textureLocation = -1;
+		static int globalTextureNumber;
+		GLuint ID;
 };
