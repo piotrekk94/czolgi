@@ -102,13 +102,15 @@ int Terrain::calculateNormals()
 			triangle1[0] = triangle0[2];
 			triangle1[1] = points[(j + 1) + i  * columns];
 			triangle1[2] = triangle0[0];
+			normals.push_back(glm::normalize(glm::cross(
+							triangle0[1] - triangle0[0],
+							triangle0[2] - triangle0[0])));
 
 			normals.push_back(glm::normalize(glm::cross(
-							triangle0[0] - triangle0[1],
-							triangle0[1] - triangle0[2])));
-			normals.push_back(glm::normalize(glm::cross(
-							triangle1[0] - triangle1[1],
-							triangle1[1] - triangle1[2])));
+							triangle1[1] - triangle1[0],
+							triangle1[2] - triangle1[0])));
+//			normals.push_back(glm::vec3(1.0f));
+//			normals.push_back(glm::vec3(1.0f));
 		}
 	}
 	glm::vec3 normalToPoint;
@@ -118,15 +120,15 @@ int Terrain::calculateNormals()
 		{
 			normalToPoint = glm::vec3(0);
 			if ((i != 0) && (j != (columns - 1)))
-				normalToPoint += normals[0 + 2 * j  + 2 * (i - 1) * columns];
+				normalToPoint += normals[0 + 2 * j  + 2 * (i - 1) * (columns - 1)];
 			if ((i != 0) && (j != 0))
 				for (int k = 0; k < 2 ; k++)
-					normalToPoint += normals[k + 2 * (j - 1) + 2 * (i - 1) * columns];
+					normalToPoint += normals[k + 2 * (j - 1) + 2 * (i - 1) * (columns - 1)];
 			if ((i != (rows - 1)) && (j != (columns - 1)))
 				for (int k = 0; k < 2 ; k++)
-					normalToPoint += normals[k + 2 * j + 2 * i * columns];
+					normalToPoint += normals[k + 2 * j + 2 * i * (columns - 1)];
 			if ((i != (rows - 1)) && (j != 0))
-				normalToPoint += normals[1 + 2 * (j - 1) + 2 * i * columns];
+				normalToPoint += normals[1 + 2 * (j - 1) + 2 * i * (columns - 1)];
 			normalsToPoint.push_back(glm::normalize(normalToPoint));
 		}
 	}
@@ -134,7 +136,10 @@ int Terrain::calculateNormals()
 }
 float Terrain::getHeight(float x, float z)
 {
-int i = ((x / sc.x) + 0.5f) * (columns - 1);
-int j = ((z / sc.z) + 0.5f) * (rows - 1);
-return points[i + j * columns].y * sc.y;
+	float height = 0;
+	int j = ((x / sc.x) + 0.5f) * (columns - 1);
+	int i = ((z / sc.z) + 0.5f) * (rows - 1);
+	//	if ((i < rows) && (j < columns))
+	height = points[j + i * columns].y * sc.y;
+	return height;
 }
