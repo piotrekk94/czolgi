@@ -1,4 +1,6 @@
 #include "camera.hpp"
+#include <stdlib.h>
+#include <stdio.h>
 
 glm::mat4 Camera::getVMatrix(){
     return glm::lookAt(this->pos, this->pos + this->front, this->up);
