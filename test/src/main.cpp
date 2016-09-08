@@ -28,8 +28,8 @@ Camera camera;
 std::vector<Model> models;
 
 bool keyState[1024]; //True - wcisniety
-static double xposOld, yposOld; // poprzednia pozycja kursora myszy
 double deltaTime = 0;
+bool firstCursorMove = 1;
 
 int main(int argc, char **argv)
 {
@@ -63,7 +63,6 @@ int main(int argc, char **argv)
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
-	glfwGetCursorPos(window, &xposOld, &yposOld);
 	glClearColor(0.0f, 0.0f, 0.2f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -174,6 +173,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 
 static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 {
+	static double xposOld, yposOld; // poprzednia pozycja kursora myszy
+	if (firstCursorMove == 1) {glfwGetCursorPos(window, &xposOld, &yposOld); firstCursorMove = 0;}
 	camera.rotate(xpos - xposOld, yposOld - ypos);
 	xposOld = xpos;
 	yposOld = ypos;
