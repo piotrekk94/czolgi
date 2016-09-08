@@ -4,15 +4,15 @@ VBO::VBO(ShaderProgram *shader, std::vector<glm::vec3> *points, std::vector<glm:
 	this->shader = shader;
 	glGenVertexArrays(1,&vertexArrayID); // ??? raczej osobne
 	activate();
-	fprintf(stderr,"generuje buffor wierzcholkow");
+	fprintf(stderr,"generuje buffor wierzcholkow\n");
 	genBuf(&vertexBuffer, points);
-	fprintf(stderr,"generuje buffor textur");
+	fprintf(stderr,"generuje buffor textur\n");
 	genBuf(&textureBuffer, textureCoordinates );
-	fprintf(stderr,"generuje buffor normalnych");
+	fprintf(stderr,"generuje buffor normalnych\n");
 	genBuf(&normalsBuffer, normals);
 	if (indices != nullptr)
 	{
-	fprintf(stderr,"generuje buffor ");
+	fprintf(stderr,"generuje buffor\n");
 		elementArray = 1;
 		genBuf(&elementBuffer, indices, GL_ELEMENT_ARRAY_BUFFER);
 	}
@@ -165,7 +165,7 @@ VBO::VBO(ShaderProgram *shader, const char *fileName, int *hasTextureCoords, uns
 }
 //VBO::~VBO()
 //{
-	
+
 //}
 void VBO::assignVBO(const char * name, GLuint buffer, int points, GLuint type)
 {

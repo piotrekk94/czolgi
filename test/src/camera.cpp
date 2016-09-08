@@ -1,7 +1,7 @@
 #include "camera.hpp"
 
 glm::mat4 Camera::getVMatrix(){
-    return glm::lookAt(this->pos, this->pos+this->front, this->up);
+    return glm::lookAt(this->pos, this->pos + this->front, this->up);
 }
 
 Camera::Camera(glm::vec3 pos, glm::vec3 up, glm::vec3 front, float yaw, float pitch){
@@ -10,7 +10,7 @@ Camera::Camera(glm::vec3 pos, glm::vec3 up, glm::vec3 front, float yaw, float pi
   this->front = front;
   this->yaw = yaw;
   this->pitch = pitch;
-  this->right = glm::vec3(1, 0, 0);
+  this->right = glm::vec3(0, 0, 1);
 }
 
 void Camera::setPos(float x, float y, float z){

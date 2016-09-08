@@ -28,7 +28,7 @@ Camera camera;
 std::vector<Model> models;
 
 bool keyState[1024]; //True - wcisniety
-
+static double xposOld, yposOld; // poprzednia pozycja kursora myszy
 double deltaTime = 0;
 
 int main(int argc, char **argv)
@@ -63,6 +63,7 @@ int main(int argc, char **argv)
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
+	glfwGetCursorPos(window, &xposOld, &yposOld);
 	glClearColor(0.0f, 0.0f, 0.2f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -79,19 +80,28 @@ int main(int argc, char **argv)
 int mainLoop()
 {
 	ShaderProgram Shader("vertex.vert", "fragment.frag");
+
 	Tank tank("models/tygrysv2.obj", &Shader, &camera);
+
 	Terrain teren(&Shader, "./tekstury/terrain.png");
 	teren.setPos(0,0,0);
 	teren.setScale(50,20,50);
 
 	models.push_back(Model("models/cube2.obj", &Shader));
 	models.push_back(Model("models/farmhousev2.obj", &Shader));
+	models.push_back(Model("models/farmhousev2.obj", &Shader)); // drugi domek dodany na pale
 	models[0].setPos(2,0,0);
 	models[1].setPos(2,teren.getHeight(2,0),0);
 	models[1].setAngle(0,40,0);
 	models[1].setScale(0.02,0.02,0.02);
 	models[1].textureLoad("./tekstury/farmhouse.dds");
 	models[1].bumpTextureLoad("./tekstury/farmhouseBumpToUse.dds",1);
+	// drugi domek dodany na pale
+	models[2].setPos(6,teren.getHeight(6,-10),-10);
+	models[2].setAngle(0,20,0);
+	models[2].setScale(0.02,0.02,0.02);
+	models[2].textureLoad("./tekstury/farmhouse.dds");
+	models[2].bumpTextureLoad("./tekstury/farmhouseBumpToUse.dds",1);
 
 	glm::vec4 lightPosition = glm::vec4(0,3,30,1);
 	Light light(lightPosition);
@@ -102,7 +112,6 @@ int mainLoop()
 	light.power = 0.5;
 	light.position = glm::vec4(0,5,5,0);
 	Model::light.push_back(light);
-	float ldx = 0, ldy = 0;
 
 	glm::mat4 ProjectionMatrix = glm::perspective(45.0f, float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
 	Model::setPMatrix(ProjectionMatrix);
@@ -112,7 +121,7 @@ int mainLoop()
 		tank.updateCamera();
 		Model::setVMatrix(camera.getVMatrix());
 
-		Model::light[0].position = glm::vec4(ldx,ldy,0,1);
+		Model::light[0].position = glm::vec4(0,0,0,1);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		for (unsigned i = 0; i < models.size(); i++) {
@@ -127,7 +136,7 @@ int mainLoop()
 		fpsMeter();
 		handleKeys(&tank);
 		tank.move(deltaTime);
-		tank.setHeight(teren.getHeight(tank.x(),tank.z()));
+		tank.setHeight(teren.getHeight(tank.getX(),tank.getZ()));
 	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 	return 0;
 }
@@ -165,11 +174,9 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 
 static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 {
-	static double xposOld = 0, yposOld = 0;
 	camera.rotate(xpos - xposOld, yposOld - ypos);
 	xposOld = xpos;
 	yposOld = ypos;
-	//fprintf(stderr,"xpos: %lf; ypos: %lf\n", xpos, ypos);
 }
 
 void fpsMeter()

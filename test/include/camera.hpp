@@ -11,7 +11,7 @@ enum Direction {
 class Camera
 {
 public:
-  Camera(glm::vec3 pos = glm::vec3(0, 0, 0), glm::vec3 up = glm::vec3(0, 1, 0), glm::vec3 front = glm::vec3(0, 0, -1), float yaw = 0, float pitch = 0);
+  Camera(glm::vec3 pos = glm::vec3(0, 0, 0), glm::vec3 up = glm::vec3(0, 1, 0), glm::vec3 front = glm::vec3(1, 0, 0), float yaw = 0, float pitch = 0);
   glm::mat4 getVMatrix();
 
   void setPos(float x, float y, float z);
