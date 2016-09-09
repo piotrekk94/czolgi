@@ -17,6 +17,11 @@ class Terrain: public Model
 		Terrain(ShaderProgram *ptrShader, const char *fileName);
 		float getHeight(float x, float z);
 	private:
+		void smooth(){
+		smoothVertical();
+		smoothHorizontal();};
+		int smoothVertical();
+		int smoothHorizontal();
 		int calculateIndices();
 		int rows, columns, channels;
 		int calculateNormals();

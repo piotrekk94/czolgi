@@ -83,6 +83,7 @@ int mainLoop()
 	Tank tank("models/tygrysv2.obj", &Shader, &camera);
 
 	Terrain teren(&Shader, "./tekstury/terrain.png");
+	teren.textureLoad("./tekstury/grass.jpg");
 	teren.setPos(0,0,0);
 	teren.setScale(50,20,50);
 

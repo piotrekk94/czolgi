@@ -63,11 +63,52 @@ int Terrain::loadHeightMap(const char *fileName)
 			point.z = (float)i / (rows - 1) - 0.5f;
 			point.y = image[(j + i * columns) * 3] / 255.0f - 0.5f;//RGB
 			points.push_back(point);
-			textureCoordinates.push_back(glm::vec2( j / columns, i / rows));
+			textureCoordinates.push_back(glm::vec2( (j / 10.0f), (i / 10.0f) ));
 		}
 
 	}
+	hasTextureCoords = 1;
 return 0;
+}
+int Terrain::smoothHorizontal()
+{
+	std::vector<glm::vec3> smoothPoints;
+	glm::vec3 two = glm::vec3(2);
+	for(int i = 0; i < rows; i++)
+	{
+		for(int j = 0; j < columns; j++)
+		{
+		smoothPoints.push_back(points[j + i * columns]);
+		if (j != columns - 1)
+			smoothPoints.push_back((points[j + i * columns] + points[j + i * columns + 1]) / two);
+
+		}
+
+	}
+	points = smoothPoints;
+	columns += columns -1;
+return 0;
+}
+int Terrain::smoothVertical()
+{
+	std::vector<glm::vec3> smoothPoints;
+	glm::vec3 two = glm::vec3(2);
+	for(int i = 0; i < rows; i++)
+	{
+			for(int j = 0; j < columns; j++)
+			{
+				smoothPoints.push_back(points[j + i * columns]);
+			}
+		if (i != rows - 1)
+		{
+			for(int j = 0; j < columns; j++)
+				smoothPoints.push_back((points[j + i * columns] + points[j + (i + 1) * columns]) / two);
+		}
+
+	}
+	points = smoothPoints;
+	rows += rows -1;
+	return 0;
 }
 int Terrain::calculateIndices()
 {
@@ -84,7 +125,7 @@ int Terrain::calculateIndices()
 		}
 		indices.push_back(rows * columns);// primitive restart
 	}
-return 0;
+	return 0;
 }
 int Terrain::calculateNormals()
 {
@@ -109,8 +150,8 @@ int Terrain::calculateNormals()
 			normals.push_back(glm::normalize(glm::cross(
 							triangle1[1] - triangle1[0],
 							triangle1[2] - triangle1[0])));
-//			normals.push_back(glm::vec3(1.0f));
-//			normals.push_back(glm::vec3(1.0f));
+			//			normals.push_back(glm::vec3(1.0f));
+			//			normals.push_back(glm::vec3(1.0f));
 		}
 	}
 	glm::vec3 normalToPoint;
