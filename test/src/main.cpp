@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 int mainLoop()
 {
 	ShaderProgram shader("vertex.vert", "fragment.frag");
-	ShaderProgram particlesShader("particles_vertex.vert", "particles_fragment.frag");
+	ShaderProgram particlesShader("particles.vert", "particles.frag");
 
 	Tank tank("models/tygrysv2.obj", &shader, &camera);
 
@@ -104,7 +104,7 @@ int mainLoop()
 	models[2].textureLoad("./tekstury/farmhouse.dds");
 	models[2].bumpTextureLoad("./tekstury/farmhouseBumpToUse.dds",1);
 
-	particles = new ParticlesGenerator(&particlesShader, textureLoad("./tekstury/particle.jpg"), 500);
+	particles = new ParticlesGenerator(particlesShader, Texture("./tekstury/particle.jpg"), 500);
 
 	glm::vec4 lightPosition = glm::vec4(0,3,30,1);
 	Light light(lightPosition);
@@ -133,7 +133,7 @@ int mainLoop()
 		}
 		terrain.draw();
 		tank.draw();
-		//particles->draw();
+		particles->draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		double endTime = glfwGetTime();
@@ -142,7 +142,7 @@ int mainLoop()
 		handleKeys(&tank);
 		tank.move(deltaTime);
 		tank.setHeight(terrain.getHeight(tank.getX(),tank.getZ()));
-		//particles->update(deltaTime, glm::vec3(1,1,1), glm::vec3(0,1,0), 2, glm::vec3(1,1,1));  // do podpiecia pod lewy przycisk myszy // offset??
+		particles->update(deltaTime, glm::vec3(1,terrain.getHeight(1,1) + 2,1), glm::vec3(0,1,0), 2, glm::vec3(1,1,1));  // do podpiecia pod lewy przycisk myszy // offset??
 	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 	return 0;
 }
