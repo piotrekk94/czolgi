@@ -47,8 +47,8 @@ class Model
 
 		int setMMatrix(glm::mat4 MMatrix);
 
-		int textureLoad(const char *fileName, int number = -1);
-		int bumpTextureLoad(const char *fileName, int number = -1);
+		std::shared_ptr<Texture> textureLoad(const char *fileName, int number = -1);
+		std::shared_ptr<Texture> bumpTextureLoad(const char *fileName, int number = -1);
 		int textureShare(const std::shared_ptr<Texture> *ptr, int number = -1);
 		int bumpTextureShare(const std::shared_ptr<Texture> *ptr, int number = -1);
 		const std::shared_ptr<Texture> *getTexture(int number){return &textures[number];};

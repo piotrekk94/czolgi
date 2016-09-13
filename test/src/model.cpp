@@ -166,10 +166,10 @@ int Model::textureUse(unsigned location, int number)
 	}
 }
 */
-int Model::textureLoad(const char * fileName, int number)
+std::shared_ptr<Texture> Model::textureLoad(const char * fileName, int number)
 {
 	//int location = -1;
-	int returnValue = -1;
+	std::shared_ptr<Texture> ptrToReturn;
 #if DEBUG == 1
 	fprintf(stderr,"ladowanie tekstury: %s\n", fileName);
 	clock_t begin = clock();
@@ -184,16 +184,16 @@ int Model::textureLoad(const char * fileName, int number)
 		textures[number] = std::make_shared<Texture>();
 		textures[number]->read(fileName);
 		hasTexture = 1;
-	returnValue = textures[number]->getTextureLocation();
+		ptrToReturn = textures[number];
 	}
 #if DEBUG == 1
 	clock_t end = clock();
 	double elapsed = (1000 * double(end - begin)/CLOCKS_PER_SEC);
 	fprintf(stderr,"czas: %f ms\n", elapsed);
 #endif
-	return returnValue;
+	return ptrToReturn;
 }
-int Model::bumpTextureLoad(const char * fileName, int number)
+std::shared_ptr<Texture> Model::bumpTextureLoad(const char * fileName, int number)
 {
 	if ((number < 0) || ((unsigned)number >= textures.size())) //jesli nie ma takiego numeru wczytaj jako nową
 	{
