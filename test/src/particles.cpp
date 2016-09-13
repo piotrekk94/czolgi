@@ -1,12 +1,12 @@
 #include "particles.hpp"
 
-ParticleGenerator::ParticleGenerator(ShaderProgram shader, Texture texture, GLuint amount)
+ParticlesGenerator::ParticlesGenerator(ShaderProgram shader, Texture texture, GLuint amount)
 	:shader(shader), texture(texture), amount(amount)
 {
 	this->init();
 }
 
-void ParticleGenerator::update(GLfloat dt, glm::vec3 position, glm::vec3 velocity, GLuint newParticles, glm::vec3 offset)
+void ParticlesGenerator::update(GLfloat dt, glm::vec3 position, glm::vec3 velocity, GLuint newParticles, glm::vec3 offset)
 {
 	// Add new particles
 	for (GLuint i = 0; i < newParticles; ++i) {
@@ -24,7 +24,7 @@ void ParticleGenerator::update(GLfloat dt, glm::vec3 position, glm::vec3 velocit
 	}
 }
 
-void ParticleGenerator::draw()
+void ParticlesGenerator::draw()
 {
 	// Use additive blending to give it a 'glow' effect
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -33,7 +33,7 @@ void ParticleGenerator::draw()
 		if (particle.life > 0.0f) {
 			this->shader.setVector3f("offset", particle.position);
 			this->shader.setVector4f("color", particle.color);
-		//	this->texture.bind();
+			this->texture.activate();
 			glBindVertexArray(this->VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glBindVertexArray(0);
@@ -43,7 +43,7 @@ void ParticleGenerator::draw()
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void ParticleGenerator::init()
+void ParticlesGenerator::init()
 {
 	// Set up mesh and attribute properties
 	GLuint VBO;
@@ -74,7 +74,7 @@ void ParticleGenerator::init()
 
 // Stores the index of the last particle used (for quick access to next dead particle)
 GLuint lastUsedParticle = 0;
-GLuint ParticleGenerator::firstUnusedParticle()
+GLuint ParticlesGenerator::firstUnusedParticle()
 {
 	// First search from last used particle, this will usually return almost instantly
 	for (GLuint i = lastUsedParticle; i < this->amount; ++i) {
@@ -95,7 +95,7 @@ GLuint ParticleGenerator::firstUnusedParticle()
 	return 0;
 }
 
-void ParticleGenerator::respawnParticle(Particle &particle, glm::vec3 position, glm::vec3 velocity, glm::vec3 offset)
+void ParticlesGenerator::respawnParticle(Particle &particle, glm::vec3 position, glm::vec3 velocity, glm::vec3 offset)
 {
 	GLfloat random = ((rand() % 100) - 50) / 10.0f;
 	GLfloat rColor = 0.5 + ((rand() % 100) / 100.0f);

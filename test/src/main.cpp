@@ -24,12 +24,12 @@ GLFWwindow *window;
 GLuint VertexArrayID;
 
 Camera camera;
+ParticlesGenerator *particles;
 
 std::vector<Model> models;
 
 bool keyState[1024]; //True - wcisniety
 double deltaTime = 0;
-bool firstCursorMove = 1;
 
 int main(int argc, char **argv)
 {
@@ -78,30 +78,33 @@ int main(int argc, char **argv)
 
 int mainLoop()
 {
-	ShaderProgram Shader("vertex.vert", "fragment.frag");
+	ShaderProgram shader("vertex.vert", "fragment.frag");
+	ShaderProgram particlesShader("particles_vertex.vert", "particles_fragment.frag");
 
-	Tank tank("models/tygrysv2.obj", &Shader, &camera);
+	Tank tank("models/tygrysv2.obj", &shader, &camera);
 
-	Terrain teren(&Shader, "./tekstury/terrain.png");
-	teren.textureLoad("./tekstury/grass.jpg");
-	teren.setPos(0,0,0);
-	teren.setScale(50,20,50);
+	Terrain terrain(&shader, "./tekstury/terrain.png");
+	terrain.textureLoad("./tekstury/grass.jpg");
+	terrain.setPos(0,0,0);
+	terrain.setScale(50,20,50);
 
-	models.push_back(Model("models/cube2.obj", &Shader));
-	models.push_back(Model("models/farmhousev2.obj", &Shader));
-	models.push_back(Model("models/farmhousev2.obj", &Shader)); // drugi domek dodany na pale
+	models.push_back(Model("models/cube2.obj", &shader));
+	models.push_back(Model("models/farmhousev2.obj", &shader));
+	models.push_back(Model("models/farmhousev2.obj", &shader)); // drugi domek ale bez wspoldzielenia
 	models[0].setPos(2,0,0);
-	models[1].setPos(2,teren.getHeight(2,0),0);
+	models[1].setPos(2,terrain.getHeight(2,0),0);
 	models[1].setAngle(0,40,0);
 	models[1].setScale(0.02,0.02,0.02);
 	models[1].textureLoad("./tekstury/farmhouse.dds");
 	models[1].bumpTextureLoad("./tekstury/farmhouseBumpToUse.dds",1);
-	// drugi domek dodany na pale
-	models[2].setPos(6,teren.getHeight(6,-10),-10);
+	// drugi domek bez wspoldzielenia
+	models[2].setPos(6,terrain.getHeight(6,-10),-10);
 	models[2].setAngle(0,20,0);
 	models[2].setScale(0.02,0.02,0.02);
 	models[2].textureLoad("./tekstury/farmhouse.dds");
 	models[2].bumpTextureLoad("./tekstury/farmhouseBumpToUse.dds",1);
+
+	particles = new ParticlesGenerator(&particlesShader, textureLoad("./tekstury/particle.jpg"), 500);
 
 	glm::vec4 lightPosition = glm::vec4(0,3,30,1);
 	Light light(lightPosition);
@@ -119,6 +122,7 @@ int mainLoop()
 	do {
 		double startTime = glfwGetTime();
 		tank.updateCamera();
+
 		Model::setVMatrix(camera.getVMatrix());
 
 		Model::light[0].position = glm::vec4(0,0,0,1);
@@ -127,8 +131,9 @@ int mainLoop()
 		for (unsigned i = 0; i < models.size(); i++) {
 			models[i].draw();
 		}
-		teren.draw();
+		terrain.draw();
 		tank.draw();
+		//particles->draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		double endTime = glfwGetTime();
@@ -136,7 +141,8 @@ int mainLoop()
 		fpsMeter();
 		handleKeys(&tank);
 		tank.move(deltaTime);
-		tank.setHeight(teren.getHeight(tank.getX(),tank.getZ()));
+		tank.setHeight(terrain.getHeight(tank.getX(),tank.getZ()));
+		//particles->update(deltaTime, glm::vec3(1,1,1), glm::vec3(0,1,0), 2, glm::vec3(1,1,1));  // do podpiecia pod lewy przycisk myszy // offset??
 	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 	return 0;
 }
@@ -175,6 +181,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos)
 {
 	static double xposOld, yposOld; // poprzednia pozycja kursora myszy
+	static bool firstCursorMove = 1;
 	if (firstCursorMove == 1) {glfwGetCursorPos(window, &xposOld, &yposOld); firstCursorMove = 0;}
 	camera.rotate(xpos - xposOld, yposOld - ypos);
 	xposOld = xpos;

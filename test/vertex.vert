@@ -24,7 +24,7 @@ void main()
 	normalize(vec4(tangents,0)),
 	normalize(vec4(bitangents,0)),
 	normalize(vec4(Normals,0)),
-	vec4(0,0,0,1)));// ??? nadzieja umiera ostatnia
+	vec4(0,0,0,1)));// ???
 	vertex_camera = V * M * vec4(vertex, 1);
 	gl_Position = MVP * vec4(vertex,1);
 	UV = vec2(vertexTexture.x, vertexTexture.y);

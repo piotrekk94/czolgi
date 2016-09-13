@@ -1,5 +1,5 @@
-#ifndef H_PARTICLE_GENERATOR
-#define H_PARTICLE_GENERATOR
+#ifndef H_PARTICLES_GENERATOR
+#define H_PARTICLES_GENERATOR
 #include <vector>
 
 #include <GL/glew.h>
@@ -17,11 +17,11 @@ struct Particle {
 	Particle():position(0.0f), velocity(0.0f), color(1.0f), life(0.0f) { }
 };
 
-class ParticleGenerator
+class ParticlesGenerator
 {
 public:
 	// konstruktor klasy
-	ParticleGenerator(ShaderProgram shader, Texture texture, GLuint amount);
+	ParticlesGenerator(ShaderProgram shader, Texture texture, GLuint amount);
 	// odswiez wszystkie czastki
 	void update(GLfloat dt, glm::vec3 position, glm::vec3 velocity, GLuint newParticles, glm::vec3 offset = glm::vec3(0.0f, 0.0f,0.0f)); // dt - delta time
 	//renderowanie wszystkich czastek

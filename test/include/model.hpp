@@ -51,8 +51,7 @@ class Model
 		int bumpTextureLoad(const char *fileName, int number = -1);
 		int textureShare(const std::shared_ptr<Texture> *ptr, int number = -1);
 		int bumpTextureShare(const std::shared_ptr<Texture> *ptr, int number = -1);
-		const std::shared_ptr<Texture> *getTexture(int number){
-		return &textures[number];};
+		const std::shared_ptr<Texture> *getTexture(int number){return &textures[number];};
 
 		static std::vector<Light> light;
 		static float ambient;

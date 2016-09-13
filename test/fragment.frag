@@ -8,14 +8,14 @@ uniform vec4 color;
 uniform vec4 specularColor;
 uniform float shinniness;
 uniform float ambient;
-// 
+//
 uniform int lightNumber;
 struct Light
 {
-vec4 position;//camera space
-vec3 color;
-float power;
-int type;
+	vec4 position;//camera space
+	vec3 color;
+	float power;
+	int type;
 };
 //layout (std140) uniform LightBlock
 //{
@@ -32,20 +32,21 @@ uniform int hasBump;
 const int hasBump2 = 1;
 vec4 textureColor = color;
 vec4 useSpecularColor;
+
 //functions
 float phong(vec4 toLight, vec4 toViewer, float power, float shinniness);
 vec3 simpleShading(vec3 material, vec3 light, float distance);
 float lambert(vec4 toLight, float power);
 vec3 calcLight();
-//
 vec3 gamma = vec3(2.2);
 vec4 norm = normalize(normals);
+
 void main()
 {
 	/////////////////////////////
 	if (hasTexture == 1)
 	 {
-		 textureColor = texture( textureArray[0], UV); 
+		 textureColor = texture( textureArray[0], UV);
 	 }
 
 	if (hasBump == 1)
@@ -57,6 +58,7 @@ void main()
 	outputColor.rgb = calcLight();
 //	outputColor.rgb = light[0].color * Il;
 }
+
 vec3 calcLight()
 {
 	float d;
@@ -65,7 +67,7 @@ vec3 calcLight()
 	vec3 color = textureColor.rgb * ambient;
 	for (int i = 0; i < lightNumber ; i++)
 	{
-		switch (light[i].type ) 
+		switch (light[i].type )
 		{
 			case 1:
 				{
@@ -97,6 +99,7 @@ vec3 calcLight()
 	return pow(color, 1/gamma);//gamma correction
 
 }
+
 float phong(vec4 toLight, vec4 toViewer, float power, float shinniness)
 {
 	vec4 P = -normalize(toLight);//???
@@ -106,12 +109,14 @@ float phong(vec4 toLight, vec4 toViewer, float power, float shinniness)
 	return I;
 
 }
+
 float lambert(vec4 toLight, float power)
 {
 	vec4 L = normalize(toLight);
 	float I = dot(norm, L); //???
 	return clamp(I * power, 0.0f, 1.0f);
 }
+
 vec3 simpleShading(vec3 material, vec3 light, float distance)
 {
 	return material * light / (1 + distance * distance);
