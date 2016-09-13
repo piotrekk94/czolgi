@@ -56,6 +56,7 @@ void main()
 	textureColor.rgb = pow(textureColor.rgb, gamma);//gamma correction
 	useSpecularColor.rgb = pow(specularColor.rgb, gamma);//gamma correction
 	outputColor.rgb = calcLight();
+	outputColor.a = textureColor.a;
 //	outputColor.rgb = light[0].color * Il;
 }
 

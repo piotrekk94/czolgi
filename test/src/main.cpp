@@ -66,6 +66,8 @@ int main(int argc, char **argv)
 	glClearColor(0.0f, 0.0f, 0.2f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glEnable(GL_CULL_FACE);
 	glGenVertexArrays(1, &VertexArrayID);
 
@@ -101,7 +103,7 @@ int mainLoop()
 	models[2].setPos(6,terrain.getHeight(6,-10),-10);
 	models[2].setAngle(0,20,0);
 	models[2].setScale(0.02,0.02,0.02);
-	models[2].textureLoad("./tekstury/farmhouse.dds");
+	models[2].textureLoad("./tekstury/particles.png");
 	models[2].bumpTextureLoad("./tekstury/farmhouseBumpToUse.dds",1);
 
 	particles = new ParticlesGenerator(particlesShader, Texture("./tekstury/particle.jpg"), 500);

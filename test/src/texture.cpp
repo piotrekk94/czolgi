@@ -44,11 +44,11 @@ int Texture::read(const char * fileName)
 	}
 	else
 	{
-		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGB);
+		unsigned char * image = SOIL_load_image(fileName, &width, &height, &channels,  SOIL_LOAD_RGBA);
 		glActiveTexture(GL_TEXTURE0 + textureLocation);
 		glGenTextures(1, &(ID));
 		glBindTexture(GL_TEXTURE_2D, ID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	}
 	//	if (mipmap)
 	{
