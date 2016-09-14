@@ -111,12 +111,13 @@ int mainLoop()
 	glm::vec4 lightPosition = glm::vec4(0,3,30,1);
 	Light light(lightPosition);
 	light.color = glm::vec3(1,1,1);
-	light.power = 1;
+//	light.power = 1;
 	Model::light.push_back(light);
 	light.type = 2;
 	light.power = 0.5;
 	light.position = glm::vec4(0,5,5,0);
 	Model::light.push_back(light);
+	Terrain::light.push_back(light);
 
 	glm::mat4 ProjectionMatrix = glm::perspective(45.0f, float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
 	Model::setPMatrix(ProjectionMatrix);

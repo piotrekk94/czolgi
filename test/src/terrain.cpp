@@ -150,8 +150,6 @@ int Terrain::calculateNormals()
 			normals.push_back(glm::normalize(glm::cross(
 							triangle1[1] - triangle1[0],
 							triangle1[2] - triangle1[0])));
-			//			normals.push_back(glm::vec3(1.0f));
-			//			normals.push_back(glm::vec3(1.0f));
 		}
 	}
 	glm::vec3 normalToPoint;

@@ -68,24 +68,16 @@ vec3 calcLight()
 	vec3 color = textureColor.rgb * ambient;
 	for (int i = 0; i < lightNumber ; i++)
 	{
-		switch (light[i].type )
-		{
-			case 1:
+		if (light[i].type == 1)
 				{
 					d = length((vertex_camera - light[i].position));//optymalizacje potrzebne
 					toLight = normalize(light[i].position - vertex_camera);
-					break;
 				}
-			case 2:
+		else if (light[i].type == 2)
 				{
 					d = 0;
 					toLight = normalize(light[i].position);
-					break;
 				}
-			default:
-				continue;
-				break;
-		}
 		toViewer = normalize((vec4(0,0,0,1) - vertex_camera));
 		if (hasBump == 1)
 		{
