@@ -175,10 +175,18 @@ int Terrain::calculateNormals()
 }
 float Terrain::getHeight(float x, float z)
 {
-	float height = 0;
-	int j = ((x / sc.x) + 0.5f) * (columns - 1);
-	int i = ((z / sc.z) + 0.5f) * (rows - 1);
+	float tx = ((x / sc.x) + 0.5f) * (columns - 1);
+	float tz = ((z / sc.z) + 0.5f) * (rows - 1);
+	int j1 = floor(tx);
+	int j2 = ceil(tx);
+	int i1 = floor(tz);
+	int i2 = ceil(tz);
+	float sx = tx - floor(tx);
+	float sz = tz - floor(tz);
 	//	if ((i < rows) && (j < columns))
-	height = points[j + i * columns].y * sc.y;
+	float x1 = (1 - sx) * (points[j1 + i1 * columns].y * sc.y) + sx * (points[j2 + i1 * columns].y * sc.y);
+	float x2 = (1 - sx) * (points[j1 + i2 * columns].y * sc.y) + sx * (points[j2 + i2 * columns].y * sc.y);
+	float height = (1 - sz) * x1 + sz * x2;
+	printf("%f %f\n",((x / sc.x) + 0.5f),((z / sc.z) + 0.5f));
 	return height;
 }
