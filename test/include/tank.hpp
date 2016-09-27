@@ -21,13 +21,14 @@ public:
   Tank(const char *fileName, ShaderProgram *shader, Camera *camera);
   void handleKeys(Direction direction, float deltaTime);
   void move(float deltaTime);
-  void draw();
+  void draw(glm::vec3 normal);
   void updateCamera();
   void toggleFirstPerson();
   void textureLoad(const char * fileName);
   void setHeight(float y){position.y = y;};
   float getX(){return position.x;};
   float getZ(){return position.z;};
+  void rotate(glm::vec3 normal);
 private:
   float speed = 0;
   bool firstPerson = false;

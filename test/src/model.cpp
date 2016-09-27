@@ -258,3 +258,11 @@ void Model::rotate(float angle, glm::vec3 vector)
 {
 	MMatrix = glm::rotate(MMatrix, angle, vector);
 }
+void Model::rotate(glm::quat quat)
+{
+	MMatrix = glm::mat4(quat) * MMatrix;
+}
+void Model::rotate(glm::mat4 RMatrix)
+{
+	MMatrix = RMatrix * MMatrix;
+}

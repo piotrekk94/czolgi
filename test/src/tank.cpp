@@ -69,17 +69,20 @@ void Tank::move(float deltaTime){
   position += hullFront * speed * deltaTime;
 }
 
-void Tank::draw(){
-  parts[KADLUB].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
-  parts[GASIENICA0].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
-  parts[GASIENICA1].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
-  parts[WIEZA].setAngle(0, glm::radians(90.0f) - turretRotation, 0);
-  parts[LUFA].setAngle(-gunRotation, glm::radians(90.0f) - turretRotation, 0);
+void Tank::draw(glm::vec3 normal){
+	normal = glm::normalize(normal);
+	float angleX = acos(glm::dot(normal, glm::vec3(1, 0, 0))) - M_PI/2;//???
+	float angleZ = -acos(glm::dot(normal, glm::vec3(0, 0, 1))) + M_PI/2;//M_PI/2 ma być prostopadły???
+  parts[KADLUB].setAngle(angleX, glm::radians(90.0f) - hullRoatation, angleZ);
+  parts[GASIENICA0].setAngle(angleX, glm::radians(90.0f) - hullRoatation, angleZ);
+  parts[GASIENICA1].setAngle(angleX, glm::radians(90.0f) - hullRoatation, angleZ);
+  parts[WIEZA].setAngle(angleX, glm::radians(90.0f) - turretRotation, angleZ);
+  parts[LUFA].setAngle(angleX -gunRotation, glm::radians(90.0f) - turretRotation, angleZ);
   parts[LUFA].setCenter(0,0.1f*TANK_SCALE,0);
-  for (unsigned i = 0; i < parts.size(); i++){
+  for (unsigned i = 0; i < parts.size(); i++)
     parts[i].setPos(position.x, position.y, position.z);
+  for (unsigned i = 0; i < parts.size(); i++)
     parts[i].draw();
-  }
 }
 
 void Tank::updateCamera(){
@@ -122,4 +125,20 @@ void Tank::updateHull(){
   newFront.y = 0;
   newFront.z = sin(hullRoatation);
   hullFront = glm::normalize(newFront);
+}
+void Tank::rotate(glm::vec3 normal){
+
+	normal = glm::normalize(normal);
+	glm::vec3 tangent0 = glm::normalize(glm::cross(normal, glm::vec3(1, 0, 0)));
+
+	glm::vec3 tangent1 = glm::normalize(glm::cross(normal, tangent0));
+
+	glm::mat4 rotateMatrix(glm::vec4(tangent1, 0),
+				glm::vec4(normal, 0),
+				glm::vec4(tangent0, 0),
+				glm::vec4(0, 0, 0, 1));
+  for (unsigned i = 0; i < parts.size(); i++){
+	  parts[i].rotate(rotateMatrix);
+	  
+  }
 }

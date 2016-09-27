@@ -58,6 +58,9 @@ class Model
 		float shinniness = 10;
 		glm::vec4 color = glm::vec4(1,1,0,1);
 		glm::vec4 specularColor = glm::vec4(1,1,1,0);
+		void rotate(float angle, glm::vec3 vector);
+		void rotate(glm::quat quat);
+		void rotate(glm::mat4 RMatrix);
 	protected:
 		Model(){};
 		glm::vec3 pos, angle, sc, center;
@@ -66,7 +69,6 @@ class Model
 		int sendUniformData();
 		int readOBJ(const char *fileName, unsigned *whichMesh = nullptr);
 
-		void rotate(float angle, glm::vec3 vector);
 		void translate(glm::vec3 vector);
 		void scale(glm::vec3 vector);
 

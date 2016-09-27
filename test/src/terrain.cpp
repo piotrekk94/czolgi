@@ -190,3 +190,28 @@ float Terrain::getHeight(float x, float z)
 	printf("%f %f\n",((x / sc.x) + 0.5f),((z / sc.z) + 0.5f));
 	return height;
 }
+float length(float x, float y)
+{
+return sqrt(x*x + y*y);
+}
+glm::vec3 Terrain::getNormal(float x, float z)
+{
+	float tx = (((x / sc.x) + 0.5f) * (columns - 1));
+	float tz = (((z / sc.z) + 0.5f) * (rows - 1));
+	int j1 = floor(tx);
+	int j2 = ceil(tx);
+	int i1 = floor(tz);
+	int i2 = ceil(tz);
+	float sqrt2 = sqrt(2);//przekątna kwadratu
+	float d1 = sqrt2 - length(tz - i1, tx - j1); //distance1
+	float d2 = sqrt2 - length(tz - i1, tx - j2); //distance2
+	float d3 = sqrt2 - length(tz - i2, tx - j1); //distance3
+	float d4 = sqrt2 - length(tz - i2, tx - j2); //distance4
+	glm::vec3 normal = d1 * normalsToPoint[j1 + i1 * columns] +
+		d2 * normalsToPoint[j2 + i1 *columns] +
+		d3 * normalsToPoint[j1 + i2 *columns] +
+		d4 * normalsToPoint[j2 + i2 *columns];
+//	normal = normal / (d1 +d2 + d3 + d4);
+//	printf("%f %f\n",((x / sc.x) + 0.5f),((z / sc.z) + 0.5f));
+	return normal;
+}

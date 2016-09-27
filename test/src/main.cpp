@@ -135,7 +135,7 @@ int mainLoop()
 			models[i].draw();
 		}
 		terrain.draw();
-		tank.draw();
+		tank.draw(terrain.getNormal(tank.getX(), tank.getZ()));
 		particles->draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -145,7 +145,7 @@ int mainLoop()
 		handleKeys(&tank);
 		tank.move(deltaTime);
 		tank.setHeight(terrain.getHeight(tank.getX(),tank.getZ()));
-		particles->update(deltaTime, glm::vec3(1,terrain.getHeight(1,1) + 2,1), glm::vec3(0,1,0), 2, glm::vec3(1,1,1));  // do podpiecia pod lewy przycisk myszy // offset??
+				particles->update(deltaTime, glm::vec3(1,terrain.getHeight(1,1) + 2,1), glm::vec3(0,1,0), 2, glm::vec3(1,1,1));  // do podpiecia pod lewy przycisk myszy // offset??
 	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 	return 0;
 }
