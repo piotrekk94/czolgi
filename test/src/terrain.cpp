@@ -203,14 +203,20 @@ glm::vec3 Terrain::getNormal(float x, float z)
 	int i1 = floor(tz);
 	int i2 = ceil(tz);
 	float sqrt2 = sqrt(2);//przekątna kwadratu
-	float d1 = sqrt2 - length(tz - i1, tx - j1); //distance1
+	float distance;
+	int jtemp = j1, itemp = i1;
+	distance = sqrt2 - length(tz - i1, tx - j1); //distance1
 	float d2 = sqrt2 - length(tz - i1, tx - j2); //distance2
 	float d3 = sqrt2 - length(tz - i2, tx - j1); //distance3
-	float d4 = sqrt2 - length(tz - i2, tx - j2); //distance4
-	glm::vec3 normal = d1 * normalsToPoint[j1 + i1 * columns] +
+	if (tx > tz) //który trójkąt bierzemy
+	{
+		distance = sqrt2 - length(tz - i2, tx - j2); //distance4
+		jtemp = j2;
+		itemp = i2;
+	}
+	glm::vec3 normal = distance * normalsToPoint[jtemp + itemp * columns] +
 		d2 * normalsToPoint[j2 + i1 *columns] +
-		d3 * normalsToPoint[j1 + i2 *columns] +
-		d4 * normalsToPoint[j2 + i2 *columns];
+		d3 * normalsToPoint[j1 + i2 *columns];
 //	normal = normal / (d1 +d2 + d3 + d4);
 //	printf("%f %f\n",((x / sc.x) + 0.5f),((z / sc.z) + 0.5f));
 	return normal;
