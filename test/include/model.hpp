@@ -39,6 +39,7 @@ class Model
 		void setCenter(float x, float y, float z);
 
 		virtual int draw();
+		virtual int draw(glm::vec3 normal);
 
 		Model(const char *fileName, ShaderProgram *shader, unsigned *whichMesh = nullptr);
 		//whichMesh zwraca ile siatek jest w pliku

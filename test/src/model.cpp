@@ -19,6 +19,56 @@ void Model::setCenter(float x, float y, float z){
 	center = glm::vec3(x, y, z);
 }
 
+int Model::draw(glm::vec3 normal)
+{
+	MMatrix = glm::mat4(1.0f);
+	normal = glm::normalize(normal);
+	float angleX = acos(glm::dot(normal, glm::vec3(1, 0, 0))) - M_PI/2;//???
+	float angleZ = -acos(glm::dot(normal, glm::vec3(0, 0, 1))) + M_PI/2;//M_PI/2 ma być prostopadły???
+	translate(center);
+	translate(pos);
+	
+	rotate(angleZ, glm::vec3(0,0,1));
+	rotate(angleX, glm::vec3(1,0,0));
+
+	rotate(angle.y, glm::vec3(0,1,0));
+	rotate(angle.z, glm::vec3(0,0,1));
+	rotate(angle.x, glm::vec3(1,0,0));
+	translate(-center);
+	scale(sc);
+	shader->use();
+	sendUniformData();
+	if (hasTexture)
+	{
+		for (unsigned i=0; i < textures.size() ; i++)
+		{
+			textures[i]->activate();
+			/*
+			glActiveTexture(textureNumber[i]);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, texture[i]);
+			*/
+		}
+	}
+	vbo->activate();
+	glDrawArrays(GL_TRIANGLES, 0, verticesAmount );
+	//glDisableVertexAttribArray(0);
+	//
+	vbo->deactivate();
+	if (hasTexture)
+	{
+		for (unsigned i=0; i < textures.size() ; i++)
+		{
+			textures[i]->deactivate();
+	/*		glActiveTexture(textureNumber[i]);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			*/
+		}
+	}
+	return 0;
+}
+
 int Model::draw()
 {
 	MMatrix = glm::mat4(1.0f);

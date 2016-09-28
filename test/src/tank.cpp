@@ -73,16 +73,16 @@ void Tank::draw(glm::vec3 normal){
 	normal = glm::normalize(normal);
 	float angleX = acos(glm::dot(normal, glm::vec3(1, 0, 0))) - M_PI/2;//???
 	float angleZ = -acos(glm::dot(normal, glm::vec3(0, 0, 1))) + M_PI/2;//M_PI/2 ma być prostopadły???
-  parts[KADLUB].setAngle(angleX, glm::radians(90.0f) - hullRoatation, angleZ);
-  parts[GASIENICA0].setAngle(angleX, glm::radians(90.0f) - hullRoatation, angleZ);
-  parts[GASIENICA1].setAngle(angleX, glm::radians(90.0f) - hullRoatation, angleZ);
-  parts[WIEZA].setAngle(angleX, glm::radians(90.0f) - turretRotation, angleZ);
-  parts[LUFA].setAngle(angleX -gunRotation, glm::radians(90.0f) - turretRotation, angleZ);
+  parts[KADLUB].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
+  parts[GASIENICA0].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
+  parts[GASIENICA1].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
+  parts[WIEZA].setAngle(0, glm::radians(90.0f) - turretRotation, 0);
+  parts[LUFA].setAngle(0 -gunRotation, glm::radians(90.0f) - turretRotation, 0);
   parts[LUFA].setCenter(0,0.1f*TANK_SCALE,0);
   for (unsigned i = 0; i < parts.size(); i++)
     parts[i].setPos(position.x, position.y, position.z);
   for (unsigned i = 0; i < parts.size(); i++)
-    parts[i].draw();
+    parts[i].draw(normal);
 }
 
 void Tank::updateCamera(){
@@ -139,6 +139,6 @@ void Tank::rotate(glm::vec3 normal){
 				glm::vec4(0, 0, 0, 1));
   for (unsigned i = 0; i < parts.size(); i++){
 	  parts[i].rotate(rotateMatrix);
-	  
+
   }
 }
