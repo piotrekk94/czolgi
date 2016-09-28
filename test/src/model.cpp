@@ -23,7 +23,7 @@ int Model::draw(glm::vec3 normal)
 {
 	MMatrix = glm::mat4(1.0f);
 	normal = glm::normalize(normal);
-	float angleX = acos(glm::dot(normal, glm::vec3(1, 0, 0))) - M_PI/2;//???
+	float angleX = -acos(glm::dot(normal, glm::vec3(1, 0, 0))) + M_PI/2;//???
 	float angleZ = -acos(glm::dot(normal, glm::vec3(0, 0, 1))) + M_PI/2;//M_PI/2 ma być prostopadły???
 	translate(center);
 	translate(pos);

@@ -16,7 +16,7 @@ class Terrain: public Model
 		virtual int draw();
 		Terrain(ShaderProgram *ptrShader, const char *fileName);
 		float getHeight(float x, float z);
-		glm::vec3 getNormal(float x, float z);
+		glm::vec3 getNormal(float x, float y, float z);
 	private:
 		void smooth(){
 		smoothVertical();

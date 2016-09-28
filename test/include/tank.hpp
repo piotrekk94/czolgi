@@ -27,6 +27,7 @@ public:
   void textureLoad(const char * fileName);
   void setHeight(float y){position.y = y;};
   float getX(){return position.x;};
+  float getY(){return position.y;};
   float getZ(){return position.z;};
   void rotate(glm::vec3 normal);
 private:

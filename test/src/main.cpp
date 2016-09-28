@@ -135,7 +135,7 @@ int mainLoop()
 			models[i].draw();
 		}
 		terrain.draw();
-		tank.draw(terrain.getNormal(tank.getX(), tank.getZ()));
+		tank.draw(terrain.getNormal(tank.getX(), tank.getY(), tank.getZ()));
 		particles->draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();

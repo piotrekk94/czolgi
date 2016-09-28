@@ -190,34 +190,51 @@ float Terrain::getHeight(float x, float z)
 	printf("%f %f\n",((x / sc.x) + 0.5f),((z / sc.z) + 0.5f));
 	return height;
 }
-float length(float x, float y)
+float length(float x, float y, float z)
 {
-return sqrt(x*x + y*y);
+return std::cbrt(x*x + y*y + z*z);
 }
-glm::vec3 Terrain::getNormal(float x, float z)
+float area(glm::vec3 a, glm::vec3 b, glm::vec3 c)
+{
+	float sideA = glm::length(b - c);
+	float sideB = glm::length(a - c);
+	printf("side: %f %f\n",sideA,sideB);
+return sqrt(sideA * sideA + sideB * sideB - 2 * sideA * sideB * glm::dot(b - c, a - c));
+}
+glm::vec3 Terrain::getNormal(float x, float y, float z)
 {
 	float tx = (((x / sc.x) + 0.5f) * (columns - 1));
 	float tz = (((z / sc.z) + 0.5f) * (rows - 1));
+	x = x / sc.x;
+	y = y / sc.y;
+	z = z / sc.z;
 	int j1 = floor(tx);
 	int j2 = ceil(tx);
 	int i1 = floor(tz);
 	int i2 = ceil(tz);
-	float sqrt2 = sqrt(2);//przekątna kwadratu
-	float distance;
-	int jtemp = j1, itemp = i1;
-	distance = sqrt2 - length(tz - i1, tx - j1); //distance1
-	float d2 = sqrt2 - length(tz - i1, tx - j2); //distance2
-	float d3 = sqrt2 - length(tz - i2, tx - j1); //distance3
-	if (tx > tz) //który trójkąt bierzemy
+	
+	glm::vec3 point1 = points[j1 + i1*columns];
+	glm::vec3 point2 = points[j2 + i2*columns];
+	glm::vec3 point3;
+	int jtemp = j1, itemp = i2;
+	if (tx < tz) //który trójkąt bierzemy
 	{
-		distance = sqrt2 - length(tz - i2, tx - j2); //distance4
+		point3 = points[j2 + i1*columns];
 		jtemp = j2;
-		itemp = i2;
+		itemp = i1;
 	}
-	glm::vec3 normal = distance * normalsToPoint[jtemp + itemp * columns] +
-		d2 * normalsToPoint[j2 + i1 *columns] +
-		d3 * normalsToPoint[j1 + i2 *columns];
-//	normal = normal / (d1 +d2 + d3 + d4);
-//	printf("%f %f\n",((x / sc.x) + 0.5f),((z / sc.z) + 0.5f));
-	return normal;
+	else
+	{
+		point3 = points[j1 + i2*columns];
+	}
+	float triangleArea = area(point1, point2, point3);
+	//interpolacja na podstawie zajmowanych pól barycentryczna
+	float lambda1 = area(point3, point2, glm::vec3(x,y,z)) / triangleArea;
+	float lambda2 = area(point1, point3, glm::vec3(x,y,z)) / triangleArea;
+	float lambda3 = area(point1, point2, glm::vec3(x,y,z)) / triangleArea;
+
+	glm::vec3 normal = lambda3 * normalsToPoint[jtemp + itemp * columns] +
+		lambda1 * normalsToPoint[j1 + i1 *columns] +
+		lambda2 * normalsToPoint[j2 + i2 *columns];
+	return glm::normalize(normal);
 }
