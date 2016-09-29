@@ -31,7 +31,7 @@ int VBO::readOBJ(const char *fileName, int *hasTextureCoords, unsigned *whichMes
 	std::vector<glm::vec3> normals;
 	int totalVertices = 0;
 	Assimp::Importer importer;
-	const aiScene * scene = importer.ReadFile( fileName, aiProcess_Triangulate/* | aiProcess_GenNormals | aiProcess_FixInfacingNormals*/);
+	const aiScene * scene = importer.ReadFile( fileName, aiProcess_Triangulate | aiProcess_SortByPType /* | aiProcess_GenNormals | aiProcess_FixInfacingNormals*/);
 	if (!scene)
 	{
 		fprintf(stderr,"Blad odczytu: %s\n", fileName);

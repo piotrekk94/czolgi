@@ -102,6 +102,7 @@ int mainLoop()
 	models.push_back(Model("models/cube2.obj", &shader));
 	models.push_back(Model("models/farmhousev2.obj", &shader));
 	models.push_back(Model("models/farmhousev2.obj", &shader)); // drugi domek ale bez wspoldzielenia
+	models.push_back(Model("models/streetlamp.obj", &shader));
 	models[0].setPos(2,0,0);
 	models[1].setPos(2,terrain.getHeight(2,0),0);
 	models[1].setAngle(0,40,0);
@@ -114,6 +115,8 @@ int mainLoop()
 	models[2].setScale(0.02,0.02,0.02);
 	models[2].textureLoad("./tekstury/particles.png");
 	models[2].bumpTextureLoad("./tekstury/farmhouseBumpToUse.dds",1);
+//	models[3].setScale(0.2,0.2,0.2);
+	models[3].setPos(12,terrain.getHeight(12,10),10);
 
 	particles = new ParticlesGenerator(particlesShader, Texture("./tekstury/particle.jpg"), 500);
 
@@ -126,7 +129,7 @@ int mainLoop()
 	light.power = 0.5;
 	light.position = glm::vec4(0,5,5,0);
 	Model::light.push_back(light);
-	Terrain::light.push_back(light);
+//	Terrain::light.push_back(light);
 
 	glm::mat4 ProjectionMatrix = glm::perspective(45.0f, float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
 	Model::setPMatrix(ProjectionMatrix);
@@ -136,8 +139,6 @@ int mainLoop()
 		tank.updateCamera();
 
 		Model::setVMatrix(camera.getVMatrix());
-
-		Model::light[0].position = glm::vec4(0,0,0,1);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		for (unsigned i = 0; i < models.size(); i++) {

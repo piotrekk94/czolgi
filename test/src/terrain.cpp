@@ -187,7 +187,7 @@ float Terrain::getHeight(float x, float z)
 	float x1 = (1 - sx) * (points[j1 + i1 * columns].y * sc.y) + sx * (points[j2 + i1 * columns].y * sc.y);
 	float x2 = (1 - sx) * (points[j1 + i2 * columns].y * sc.y) + sx * (points[j2 + i2 * columns].y * sc.y);
 	float height = (1 - sz) * x1 + sz * x2;
-	printf("%f %f\n",((x / sc.x) + 0.5f),((z / sc.z) + 0.5f));
+//	printf("%f %f\n",((x / sc.x) + 0.5f),((z / sc.z) + 0.5f));
 	return height;
 }
 float length(float x, float y, float z)
@@ -198,7 +198,7 @@ float area(glm::vec3 a, glm::vec3 b, glm::vec3 c)
 {
 	float sideA = glm::length(b - c);
 	float sideB = glm::length(a - c);
-	printf("side: %f %f\n",sideA,sideB);
+//	printf("side: %f %f\n",sideA,sideB);
 return sqrt(sideA * sideA + sideB * sideB - 2 * sideA * sideB * glm::dot(b - c, a - c));
 }
 glm::vec3 Terrain::getNormal(float x, float y, float z)
