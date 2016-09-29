@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <random>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -17,6 +18,7 @@ static void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void fpsMeter();
 void handleKeys(Tank *tank);
+void handleNPC(Tank *tank);
 
 int windowWidth = 1024;
 int windowHeight = 768;
@@ -30,6 +32,12 @@ std::vector<Model> models;
 
 bool keyState[1024]; //True - wcisniety
 double deltaTime = 0;
+
+std::random_device rd;
+std::mt19937 mt(rd());
+std::uniform_real_distribution<double> distDuration(1.0, 10.0);
+std::uniform_real_distribution<double> distAngle(-1.0, 1.0);
+std::uniform_int_distribution<int> distDirection(0, 3);
 
 int main(int argc, char **argv)
 {
@@ -84,6 +92,7 @@ int mainLoop()
 	ShaderProgram particlesShader("particles.vert", "particles.frag");
 
 	Tank tank("models/tygrysv2.obj", &shader, &camera);
+	Tank NPCtank("models/tygrysv2.obj", &shader, nullptr);
 
 	Terrain terrain(&shader, "./tekstury/terrain.png");
 	terrain.textureLoad("./tekstury/grass.jpg");
@@ -136,6 +145,7 @@ int mainLoop()
 		}
 		terrain.draw();
 		tank.draw(terrain.getNormal(tank.getX(), tank.getY(), tank.getZ()));
+		NPCtank.draw(terrain.getNormal(NPCtank.getX(), NPCtank.getY(), NPCtank.getZ()));
 		particles->draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -145,9 +155,48 @@ int mainLoop()
 		handleKeys(&tank);
 		tank.move(deltaTime);
 		tank.setHeight(terrain.getHeight(tank.getX(),tank.getZ()));
+		handleNPC(&NPCtank);
+		NPCtank.move(deltaTime);
+		NPCtank.setHeight(terrain.getHeight(NPCtank.getX(),NPCtank.getZ()));
 				particles->update(deltaTime, glm::vec3(1,terrain.getHeight(1,1) + 2,1), glm::vec3(0,1,0), 2, glm::vec3(1,1,1));  // do podpiecia pod lewy przycisk myszy // offset??
 	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 	return 0;
+}
+
+void handleNPC(Tank *tank)
+{
+	static bool actionSelected = false;
+	static int direction = 0;
+	static double duration = 0.0;
+	static double rotation = 0.0;
+	if (actionSelected == false){
+		direction = distDirection(mt);
+		duration = distDuration(mt);
+		rotation = distAngle(mt);
+		actionSelected = true;
+	}	else {
+		switch (direction) {
+			case 0:
+			tank->handleKeys(FORWARD, deltaTime);
+			break;
+			case 1:
+			tank->handleKeys(BACKWARD, deltaTime);
+			break;
+			case 2:
+			tank->handleKeys(LEFT, deltaTime);
+			break;
+			case 3:
+			tank->handleKeys(RIGHT, deltaTime);
+			break;
+			default:
+			break;
+		}
+	}
+	duration -= deltaTime;
+	tank->updateTurret(rotation);
+	if (duration <= 0){
+		actionSelected = false;
+	}
 }
 
 void handleKeys(Tank *tank)

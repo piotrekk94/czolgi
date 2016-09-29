@@ -82,7 +82,8 @@ void Tank::draw(glm::vec3 normal){
   for (unsigned i = 0; i < parts.size(); i++)
     parts[i].setPos(position.x, position.y, position.z);
   for (unsigned i = 0; i < parts.size(); i++)
-    parts[i].draw(normal);
+    parts[i].draw();
+    //parts[i].draw(normal);
 }
 
 void Tank::updateCamera(){
@@ -117,6 +118,10 @@ void Tank::updateTurret(){
   newFront.y = 0;
   newFront.z = sin(turretRotation);
   turretFront = glm::normalize(newFront);
+}
+
+void Tank::updateTurret(float turretAngle){
+  turretRotation += glm::radians(turretAngle);
 }
 
 void Tank::updateHull(){

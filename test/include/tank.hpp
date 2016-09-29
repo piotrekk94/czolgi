@@ -23,6 +23,7 @@ public:
   void move(float deltaTime);
   void draw(glm::vec3 normal);
   void updateCamera();
+  void updateTurret(float turretAngle);
   void toggleFirstPerson();
   void textureLoad(const char * fileName);
   void setHeight(float y){position.y = y;};
