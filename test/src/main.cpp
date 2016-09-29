@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
 	glClearColor(0.0f, 0.0f, 0.2f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glEnable(GL_CULL_FACE);
@@ -111,7 +111,7 @@ int mainLoop()
 	glm::vec4 lightPosition = glm::vec4(0,3,30,1);
 	Light light(lightPosition);
 	light.color = glm::vec3(1,1,1);
-//	light.power = 1;
+	light.power = 1;
 	Model::light.push_back(light);
 	light.type = 2;
 	light.power = 0.5;
