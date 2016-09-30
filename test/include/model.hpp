@@ -58,7 +58,7 @@ class Model
 		static float ambient;
 		float shinniness = 10;
 		glm::vec4 color = glm::vec4(1,1,0,1);
-		glm::vec4 specularColor = glm::vec4(1,1,1,0);
+		glm::vec4 specularColor = glm::vec4(0.1,0.1,0.1,0);
 		void rotate(float angle, glm::vec3 vector);
 		void rotate(glm::quat quat);
 		void rotate(glm::mat4 RMatrix);

@@ -19,7 +19,7 @@ struct Light
 };
 //layout (std140) uniform LightBlock
 //{
-uniform	Light light[3];
+uniform	Light light[9];
 //};
 //
 uniform mat4 M;
@@ -70,7 +70,7 @@ vec3 calcLight()
 	{
 		if (light[i].type == 1)
 				{
-					d = length((vertex_camera - light[i].position));//optymalizacje potrzebne
+					d = distance( inverse(V) * vertex_camera , inverse(V) * light[i].position);
 					toLight = normalize(light[i].position - vertex_camera);
 				}
 		else if (light[i].type == 2)
@@ -85,9 +85,12 @@ vec3 calcLight()
 			toViewer = normalize(TBN * toViewer);
 		}
 		float Il = lambert(toLight, light[i].power);
-		float Ip = phong(toLight, toViewer, light[i].power, shinniness);
 		color.rgb += simpleShading(textureColor.rgb, light[i].color * Il , d);
-		//		color.rgb += simpleShading(useSpecularColor.rgb , light[i].color * Ip , d);
+		if (Il > 0)
+		{
+			float Ip = phong(toLight, toViewer, light[i].power, shinniness);
+			color.rgb += simpleShading(useSpecularColor.rgb , light[i].color * Ip , d);
+		}
 	}
 	return pow(color, 1/gamma);//gamma correction
 

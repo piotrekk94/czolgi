@@ -11,6 +11,7 @@
 #include "tank.hpp"
 #include "particles.hpp"
 #include "terrain.hpp"
+#include "lamp.hpp"
 
 int mainLoop();
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -98,11 +99,10 @@ int mainLoop()
 	terrain.textureLoad("./tekstury/grass.jpg");
 	terrain.setPos(0,0,0);
 	terrain.setScale(50,20,50);
-
+	terrain.specularColor = glm::vec4(0,0,0,0);
 	models.push_back(Model("models/cube2.obj", &shader));
 	models.push_back(Model("models/farmhousev2.obj", &shader));
 	models.push_back(Model("models/farmhousev2.obj", &shader)); // drugi domek ale bez wspoldzielenia
-	models.push_back(Model("models/streetlamp.obj", &shader));
 	models[0].setPos(2,0,0);
 	models[1].setPos(2,terrain.getHeight(2,0),0);
 	models[1].setAngle(0,40,0);
@@ -115,21 +115,26 @@ int mainLoop()
 	models[2].setScale(0.02,0.02,0.02);
 	models[2].textureLoad("./tekstury/particles.png");
 	models[2].bumpTextureLoad("./tekstury/farmhouseBumpToUse.dds",1);
-//	models[3].setScale(0.2,0.2,0.2);
-	models[3].setPos(12,terrain.getHeight(12,10),10);
+	Lamp lamp(&shader, glm::vec4(1,terrain.getHeight(1,1),1,1));
+	std::vector<Lamp> lamps;
+	lamps.push_back(Lamp(&shader, glm::vec4(1,terrain.getHeight(1,1),1,1)));
+	lamps.push_back(Lamp(&shader, glm::vec4(10,terrain.getHeight(10,12),12,1)));
+	lamps.push_back(Lamp(&shader, glm::vec4(-5,terrain.getHeight(-5,-1),-1,1)));
+	lamps.push_back(Lamp(&shader, glm::vec4(-10,terrain.getHeight(-10,-5),-5,1)));
 
 	particles = new ParticlesGenerator(particlesShader, Texture("./tekstury/particle.jpg"), 500);
 
-	glm::vec4 lightPosition = glm::vec4(0,3,30,1);
+	glm::vec4 lightPosition = glm::vec4(1,terrain.getHeight(1,1) + 1,1,1);
 	Light light(lightPosition);
 	light.color = glm::vec3(1,1,1);
 	light.power = 1;
-	Model::light.push_back(light);
+	//Model::light.push_back(light);
 	light.type = 2;
-	light.power = 0.5;
+	light.power = 0.1;
 	light.position = glm::vec4(0,5,5,0);
 	Model::light.push_back(light);
 //	Terrain::light.push_back(light);
+	fprintf(stderr,"ilosc swiatel: %lu", Model::light.size());
 
 	glm::mat4 ProjectionMatrix = glm::perspective(45.0f, float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
 	Model::setPMatrix(ProjectionMatrix);
@@ -143,6 +148,9 @@ int mainLoop()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		for (unsigned i = 0; i < models.size(); i++) {
 			models[i].draw();
+		}
+		for (unsigned i = 0; i < lamps.size(); i++) {
+		lamps[i].draw();
 		}
 		terrain.draw();
 		tank.draw(terrain.getNormal(tank.getX(), tank.getY(), tank.getZ()));

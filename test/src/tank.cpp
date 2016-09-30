@@ -71,8 +71,8 @@ void Tank::move(float deltaTime){
 
 void Tank::draw(glm::vec3 normal){
 	normal = glm::normalize(normal);
-	float angleX = acos(glm::dot(normal, glm::vec3(1, 0, 0))) - M_PI/2;//???
-	float angleZ = -acos(glm::dot(normal, glm::vec3(0, 0, 1))) + M_PI/2;//M_PI/2 ma być prostopadły???
+	//float angleX = acos(glm::dot(normal, glm::vec3(1, 0, 0))) - M_PI/2;//???
+	//float angleZ = -acos(glm::dot(normal, glm::vec3(0, 0, 1))) + M_PI/2;//M_PI/2 ma być prostopadły???
   parts[KADLUB].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
   parts[GASIENICA0].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
   parts[GASIENICA1].setAngle(0, glm::radians(90.0f) - hullRoatation, 0);
