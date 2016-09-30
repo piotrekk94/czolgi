@@ -25,7 +25,7 @@ class ShaderProgram
 		~ShaderProgram();
 	private:
 		GLuint programID;
-		GLuint VertexShaderID;
-		GLuint FragmentShaderID;
+		GLuint vertexShaderID;
+		GLuint fragmentShaderID;
 		std::string readFile(const char *fileName);
 };
